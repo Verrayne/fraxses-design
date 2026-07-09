@@ -15,23 +15,47 @@ export function Sidebar() {
               </div>
               <div className="space-y-1">
                 {section.items.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    to={item.href}
-                    className={({ isActive }) =>
-                      [
-                        "flex items-center justify-between rounded-md px-3 py-2 text-sm transition",
-                        isActive
-                          ? "bg-primary text-primary-ink shadow-soft"
-                          : "text-subtle hover:bg-elevated hover:text-ink",
-                      ].join(" ")
-                    }
-                  >
-                    <span>{item.title}</span>
-                    {item.status === "placeholder" && (
-                      <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Soon</span>
+                  <div key={item.href}>
+                    <NavLink
+                      to={item.href}
+                      className={({ isActive }) =>
+                        [
+                          "flex items-center justify-between rounded-md px-3 py-2 text-sm transition",
+                          isActive
+                            ? "bg-primary text-primary-ink shadow-soft"
+                            : "text-subtle hover:bg-elevated hover:text-ink",
+                        ].join(" ")
+                      }
+                    >
+                      <span>{item.title}</span>
+                      {item.status === "placeholder" && (
+                        <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Soon</span>
+                      )}
+                    </NavLink>
+                    {item.children && (
+                      <div className="mt-1 space-y-1 border-l border-border pl-3 ml-3">
+                        {item.children.map((child) => (
+                          <NavLink
+                            key={child.href}
+                            to={child.href}
+                            className={({ isActive }) =>
+                              [
+                                "flex items-center justify-between rounded-md px-3 py-1.5 text-[13px] transition",
+                                isActive
+                                  ? "bg-primary text-primary-ink shadow-soft"
+                                  : "text-subtle hover:bg-elevated hover:text-ink",
+                              ].join(" ")
+                            }
+                          >
+                            <span>{child.title}</span>
+                            {child.status === "new" && (
+                              <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">New</span>
+                            )}
+                          </NavLink>
+                        ))}
+                      </div>
                     )}
-                  </NavLink>
+                  </div>
                 ))}
               </div>
             </section>

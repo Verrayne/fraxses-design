@@ -13,6 +13,7 @@ export type NavItem = {
   title: string;
   href: string;
   status?: "placeholder" | "new";
+  children?: NavItem[];
 };
 
 export type NavSection = {
@@ -42,7 +43,17 @@ export const routes: NavSection[] = [
     title: "Themes",
     icon: Palette,
     items: [
-      { title: "Intenda Light - Green", href: "/docs/themes/intenda-light-green" },
+      {
+        title: "Intenda Light - Green",
+        href: "/docs/themes/intenda-light-green",
+        children: [
+          {
+            title: "Colour Usage",
+            href: "/docs/themes/intenda-light-green/colour-usage",
+            status: "new",
+          },
+        ],
+      },
       { title: "Midnight", href: "/docs/themes/midnight" },
       {
         title: "Intenda Light - Blue",

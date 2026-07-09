@@ -7,9 +7,10 @@ import { radiusTokens, shadowTokens, spacingTokens, themes } from "../content/to
 import { PreviewCard } from "../components/docs/PreviewCard";
 import { CodeBlock } from "../components/docs/CodeBlock";
 import { Button, Card, Input, SelectPreview, TabsPreview } from "../components/ui-kit";
+import { IntendaLightGreenColourUsagePage } from "./ColourUsagePage";
 
 export function DocPage() {
-  const { section = "overview", slug = "overview" } = useParams();
+  const { section = "overview", slug = "overview", topic } = useParams();
   const key = section === "overview" ? "overview" : slug;
 
   if (section === "components" && componentDocs[key]) {
@@ -31,7 +32,7 @@ export function DocPage() {
   }
 
   if (section === "themes") {
-    return <ThemePage slug={key} />;
+    return <ThemePage slug={key} topic={topic} />;
   }
 
   if (section === "foundations") {
@@ -194,7 +195,19 @@ function ShadowFoundation() {
   );
 }
 
-function ThemePage({ slug }: { slug: string }) {
+function ThemePage({ slug, topic }: { slug: string; topic?: string }) {
+  if (slug === "intenda-light-green" && topic === "colour-usage") {
+    return (
+      <PageShell
+        eyebrow="Themes"
+        title="Intenda Light - Green colour usage"
+        description="A Tailwind and Figma-style guide for how Intenda Light - Green colour tokens are used across Fraxses components, navigation, canvas workspaces and semantic states."
+      >
+        <IntendaLightGreenColourUsagePage />
+      </PageShell>
+    );
+  }
+
   const theme = themes.find((item) => item.id === (slug === "intenda-light-green" ? "intenda-green" : slug === "intenda-light-blue" ? "intenda-blue" : slug)) ?? themes[0];
 
   if (theme.status === "placeholder") {

@@ -13,7 +13,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/docs/overview" replace /> },
       {
-        path: "docs/:section?/:slug?",
+        path: "docs/:section?/:slug?/:topic?",
         element: <DocPage />,
       },
     ],
