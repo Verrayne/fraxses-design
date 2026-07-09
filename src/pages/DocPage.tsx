@@ -5,6 +5,7 @@ import { ComponentDocSections, componentDocs } from "../content/componentDocs";
 import { designSystems, type DesignSystemId } from "../content/navigation";
 import { patternDocs } from "../content/patterns";
 import { radiusTokens, shadowTokens, spacingTokens, themes } from "../content/tokens";
+import { getChildRegistryItem, getRegistryItem, type DocSectionId } from "../docs/registry";
 import { PreviewCard } from "../components/docs/PreviewCard";
 import { CodeBlock } from "../components/docs/CodeBlock";
 import { Button, Card, Input, SelectPreview, TabsPreview } from "../components/ui-kit";
@@ -22,7 +23,7 @@ export function DocPage() {
   const key = activeSection === "overview" ? "overview" : slug ?? "overview";
 
   if (activeDesignSystem === "oryx") {
-    return <OryxPage section={activeSection} slug={slug} />;
+    return <OryxPage section={activeSection} slug={slug} topic={topic} />;
   }
 
   if (activeSection === "overview") {
@@ -32,6 +33,10 @@ export function DocPage() {
   if (activeSection === "components" && componentDocs[key]) {
     const doc = componentDocs[key];
     return <PageShell eyebrow="Components" title={doc.title} description={doc.description}><ComponentDocSections doc={doc} /></PageShell>;
+  }
+
+  if (activeSection === "components" && getRegistryItem("components", key)) {
+    return <NotDocumentedPage designSystem="Intenda" section="Components" title={getRegistryItem("components", key)?.title ?? titleCase(key)} />;
   }
 
   if (activeSection === "patterns" && patternDocs[key]) {
@@ -45,6 +50,10 @@ export function DocPage() {
         </section>
       </PageShell>
     );
+  }
+
+  if (activeSection === "patterns" && getRegistryItem("patterns", key)) {
+    return <NotDocumentedPage designSystem="Intenda" section="Patterns" title={getRegistryItem("patterns", key)?.title ?? titleCase(key)} />;
   }
 
   if (activeSection === "themes") {
@@ -125,7 +134,12 @@ function FoundationPage({ slug }: { slug: string }) {
     spacing: "Spacing",
     radius: "Radius",
     shadows: "Shadows",
+    iconography: "Iconography",
   };
+
+  if (slug === "iconography") {
+    return <NotDocumentedPage designSystem="Intenda" section="Foundations" title="Iconography" />;
+  }
 
   return (
     <PageShell eyebrow="Foundations" title={titles[slug] ?? "Foundations"} description="Foundational decisions that keep Fraxses screens consistent, legible and production-friendly. Values are exposed through CSS variables and Tailwind extensions.">
@@ -272,7 +286,7 @@ function ThemePage({ slug, topic }: { slug: string; topic?: string }) {
   );
 }
 
-function OryxPage({ section, slug }: { section: string; slug?: string }) {
+function OryxPage({ section, slug, topic }: { section: string; slug?: string; topic?: string }) {
   if (section === "overview") {
     return (
       <PageShell
@@ -301,20 +315,50 @@ function OryxPage({ section, slug }: { section: string; slug?: string }) {
   }
 
   const sectionTitle = titleCase(section);
-  const pageTitle = slug ? titleCase(slug.replace(/-/g, " ")) : sectionTitle;
+  const registryItem = getRegistryItem(section as DocSectionId, slug);
+  const childItem = getChildRegistryItem(section as DocSectionId, slug, topic);
+  const pageTitle = childItem?.title ?? registryItem?.title ?? (slug ? titleCase(slug.replace(/-/g, " ")) : sectionTitle);
+
+  return <NotDocumentedPage designSystem="Oryx" section={sectionTitle} title={pageTitle} sourceUrl={designSystems.oryx.sourceUrl} />;
+}
+
+function NotDocumentedPage({
+  designSystem,
+  section,
+  title,
+  sourceUrl,
+}: {
+  designSystem: string;
+  section: string;
+  title: string;
+  sourceUrl?: string;
+}) {
   return (
     <PageShell
-      eyebrow={`Oryx / ${sectionTitle}`}
-      title={pageTitle}
-      description="Placeholder documentation page for the Oryx design system. Specifications will be added from the Oryx Figma design guide in a follow-up migration."
+      eyebrow={`${designSystem} / ${section}`}
+      title={title}
+      description={`${designSystem} documentation page reserved in the shared registry. Specifications will be added once they are documented from the source design system.`}
     >
       <PreviewCard title="Migration placeholder">
         <div className="rounded-lg border border-dashed border-border bg-background p-6">
-          <h2 className="text-base">No Oryx specifications added yet</h2>
+          <div className="mb-4 inline-flex rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-subtle">
+            Status: Not documented yet
+          </div>
+          <h2 className="text-base">No specifications added yet</h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-subtle">
-            This page exists to reserve the Oryx documentation structure. It does not invent colours,
+            This page exists to preserve documentation parity between Intenda and Oryx. It does not invent colours,
             component behaviour, spacing, states or pattern guidance.
           </p>
+          {sourceUrl && (
+            <a
+              className="mt-5 inline-flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-elevated"
+              href={sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Figma size={16} /> Open source design library <ArrowUpRight size={14} />
+            </a>
+          )}
         </div>
       </PreviewCard>
     </PageShell>

@@ -61,6 +61,12 @@ export function Sidebar() {
                       {item.status === "placeholder" && (
                         <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Soon</span>
                       )}
+                      {item.status === "coming-soon" && (
+                        <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Soon</span>
+                      )}
+                      {item.status === "not-documented-yet" && (
+                        <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Draft</span>
+                      )}
                     </NavLink>
                     {item.children && (
                       <div className="mt-1 space-y-1 border-l border-border pl-3 ml-3">
@@ -80,6 +86,12 @@ export function Sidebar() {
                             <span>{child.title}</span>
                             {child.status === "new" && (
                               <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">New</span>
+                            )}
+                            {child.status === "coming-soon" && (
+                              <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Soon</span>
+                            )}
+                            {child.status === "not-documented-yet" && (
+                              <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Draft</span>
                             )}
                           </NavLink>
                         ))}
