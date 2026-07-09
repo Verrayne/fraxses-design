@@ -67,6 +67,9 @@ export function Sidebar() {
                       {item.status === "not-documented-yet" && (
                         <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Draft</span>
                       )}
+                      {item.status === "source-identified" && (
+                        <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Source</span>
+                      )}
                     </NavLink>
                     {item.children && (
                       <div className="mt-1 space-y-1 border-l border-border pl-3 ml-3">
@@ -92,6 +95,9 @@ export function Sidebar() {
                             )}
                             {child.status === "not-documented-yet" && (
                               <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Draft</span>
+                            )}
+                            {child.status === "source-identified" && (
+                              <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase">Source</span>
                             )}
                           </NavLink>
                         ))}

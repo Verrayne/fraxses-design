@@ -5,7 +5,16 @@ import { ComponentDocSections, componentDocs } from "../content/componentDocs";
 import { designSystems, type DesignSystemId } from "../content/navigation";
 import { patternDocs } from "../content/patterns";
 import { radiusTokens, shadowTokens, spacingTokens, themes } from "../content/tokens";
-import { getChildRegistryItem, getRegistryItem, type DocSectionId } from "../docs/registry";
+import {
+  docsRegistry,
+  getChildRegistryItem,
+  getRegistryItem,
+  getSystemItemMeta,
+  getSystemItemTitle,
+  type DesignSystemId as RegistryDesignSystemId,
+  type DocSectionId,
+  type RegistryItem,
+} from "../docs/registry";
 import { PreviewCard } from "../components/docs/PreviewCard";
 import { CodeBlock } from "../components/docs/CodeBlock";
 import { Button, Card, Input, SelectPreview, TabsPreview } from "../components/ui-kit";
@@ -36,7 +45,8 @@ export function DocPage() {
   }
 
   if (activeSection === "components" && getRegistryItem("components", key)) {
-    return <NotDocumentedPage designSystem="Intenda" section="Components" title={getRegistryItem("components", key)?.title ?? titleCase(key)} />;
+    const item = getRegistryItem("components", key);
+    return <NotDocumentedPage designSystem="Intenda" section="Components" item={item} />;
   }
 
   if (activeSection === "patterns" && patternDocs[key]) {
@@ -53,7 +63,8 @@ export function DocPage() {
   }
 
   if (activeSection === "patterns" && getRegistryItem("patterns", key)) {
-    return <NotDocumentedPage designSystem="Intenda" section="Patterns" title={getRegistryItem("patterns", key)?.title ?? titleCase(key)} />;
+    const item = getRegistryItem("patterns", key);
+    return <NotDocumentedPage designSystem="Intenda" section="Patterns" item={item} />;
   }
 
   if (activeSection === "themes") {
@@ -138,7 +149,7 @@ function FoundationPage({ slug }: { slug: string }) {
   };
 
   if (slug === "iconography") {
-    return <NotDocumentedPage designSystem="Intenda" section="Foundations" title="Iconography" />;
+    return <NotDocumentedPage designSystem="Intenda" section="Foundations" item={getRegistryItem("foundations", "iconography")} />;
   }
 
   return (
@@ -292,13 +303,14 @@ function OryxPage({ section, slug, topic }: { section: string; slug?: string; to
       <PageShell
         eyebrow="Oryx"
         title="Oryx design system"
-        description="The established Fraxses design system. This structure is ready for migration from the Oryx design guide without inventing component specifications or colour values."
+        description="The established Fraxses design system. The source sections have been identified from the Oryx Introduction node and are ready for section-by-section migration."
       >
         <PreviewCard title="Source design library">
           <div className="space-y-4">
             <p className="max-w-3xl text-sm leading-7 text-subtle">
-              Oryx documentation will be migrated section by section from the source Figma design guide.
-              Values and specifications are intentionally left out until they are documented from source.
+              Oryx documentation is organised around the visible Figma guide sections: foundations,
+              components and product patterns. Detailed tokens and specifications are intentionally left
+              out until they are migrated from each matching Figma section.
             </p>
             <a
               className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-elevated"
@@ -310,6 +322,22 @@ function OryxPage({ section, slug, topic }: { section: string; slug?: string; to
             </a>
           </div>
         </PreviewCard>
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {getOryxOverviewCards().map((card) => (
+            <Link
+              key={card.href}
+              to={card.href}
+              className="rounded-lg border border-border bg-surface p-4 transition hover:border-primary hover:shadow-soft"
+            >
+              <div className="mb-3 inline-flex rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary">
+                Source identified
+              </div>
+              <h2 className="text-base">{card.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-subtle">{card.summary}</p>
+              <p className="mt-4 text-xs font-medium text-primary">{card.group}</p>
+            </Link>
+          ))}
+        </section>
       </PageShell>
     );
   }
@@ -317,22 +345,28 @@ function OryxPage({ section, slug, topic }: { section: string; slug?: string; to
   const sectionTitle = titleCase(section);
   const registryItem = getRegistryItem(section as DocSectionId, slug);
   const childItem = getChildRegistryItem(section as DocSectionId, slug, topic);
-  const pageTitle = childItem?.title ?? registryItem?.title ?? (slug ? titleCase(slug.replace(/-/g, " ")) : sectionTitle);
-
-  return <NotDocumentedPage designSystem="Oryx" section={sectionTitle} title={pageTitle} sourceUrl={designSystems.oryx.sourceUrl} />;
+  return (
+    <OryxSourcePage
+      section={sectionTitle}
+      item={childItem ?? registryItem}
+      fallbackTitle={slug ? titleCase(slug.replace(/-/g, " ")) : sectionTitle}
+    />
+  );
 }
 
 function NotDocumentedPage({
   designSystem,
   section,
-  title,
-  sourceUrl,
+  item,
+  fallbackTitle,
 }: {
   designSystem: string;
   section: string;
-  title: string;
-  sourceUrl?: string;
+  item?: RegistryItem;
+  fallbackTitle?: string;
 }) {
+  const systemId = designSystem.toLowerCase() as RegistryDesignSystemId;
+  const title = getSystemItemTitle(systemId, item) ?? fallbackTitle ?? "Documentation";
   return (
     <PageShell
       eyebrow={`${designSystem} / ${section}`}
@@ -349,20 +383,98 @@ function NotDocumentedPage({
             This page exists to preserve documentation parity between Intenda and Oryx. It does not invent colours,
             component behaviour, spacing, states or pattern guidance.
           </p>
-          {sourceUrl && (
-            <a
-              className="mt-5 inline-flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-elevated"
-              href={sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Figma size={16} /> Open source design library <ArrowUpRight size={14} />
-            </a>
-          )}
         </div>
       </PreviewCard>
     </PageShell>
   );
+}
+
+function OryxSourcePage({ section, item, fallbackTitle }: { section: string; item?: RegistryItem; fallbackTitle: string }) {
+  const meta = getSystemItemMeta("oryx", item);
+  const title = getSystemItemTitle("oryx", item) ?? fallbackTitle;
+  const sourceSection = meta?.sourceSection ?? title;
+  const summary = meta?.summary ?? `${title} is part of the Oryx documentation structure.`;
+  const aliases = meta?.aliases ?? [];
+
+  return (
+    <PageShell
+      eyebrow={`Oryx / ${section}`}
+      title={title}
+      description={summary}
+    >
+      <PreviewCard title="Figma source">
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-primary">
+              Status: Source identified
+            </span>
+            <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs text-subtle">
+              Figma section: {sourceSection}
+            </span>
+          </div>
+          <p className="max-w-3xl text-sm leading-7 text-subtle">
+            {summary} Detailed tokens, specifications, states and examples will be migrated from the
+            matching Figma section.
+          </p>
+          {aliases.length > 0 && (
+            <div>
+              <p className="text-sm font-semibold">Canonical parity aliases</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {aliases.map((alias) => (
+                  <span key={alias} className="rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-subtle">
+                    {alias}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <a
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-elevated"
+            href={designSystems.oryx.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Figma size={16} /> Open Figma source <ArrowUpRight size={14} />
+          </a>
+        </div>
+      </PreviewCard>
+      <PreviewCard title="Screenshots and examples">
+        <div className="rounded-lg border border-dashed border-border bg-background p-8 text-center">
+          <h2 className="text-base">Screenshot placeholder</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 text-subtle">
+            Screenshots, examples and annotated usage notes will be added when this Oryx section is
+            migrated from the Figma design guide.
+          </p>
+        </div>
+      </PreviewCard>
+      <PreviewCard title="Migration note">
+        <p className="max-w-3xl text-sm leading-7 text-subtle">
+          Do not add inferred colours, spacing, typography, component states or behaviours here. This page
+          should be filled only from the matching Oryx Figma section.
+        </p>
+      </PreviewCard>
+    </PageShell>
+  );
+}
+
+function getOryxOverviewCards() {
+  return docsRegistry.flatMap((section) => {
+    if (section.id === "overview" || section.id === "themes") {
+      return [];
+    }
+
+    return section.items
+      .filter((item) => getSystemItemMeta("oryx", item)?.status === "source-identified")
+      .map((item) => {
+        const meta = getSystemItemMeta("oryx", item);
+        return {
+          title: getSystemItemTitle("oryx", item) ?? item.title,
+          summary: meta?.summary ?? `${item.title} has been identified in the Oryx source guide.`,
+          group: section.title,
+          href: `/docs/oryx/${section.id}/${item.slug}`,
+        };
+      });
+  });
 }
 
 function legacyRedirectPath(designSystem?: string, section?: string, slug?: string, topic?: string) {

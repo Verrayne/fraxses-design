@@ -1,6 +1,8 @@
 import { Blocks, Box, GalleryVerticalEnd, Layers3, Palette, Sparkles } from "lucide-react";
 import {
   docsRegistry,
+  getSystemItemStatus,
+  getSystemItemTitle,
   type DesignSystemId,
   type DocumentationStatus,
   type RegistryItem,
@@ -40,13 +42,13 @@ function itemToNavItem(systemId: DesignSystemId, sectionId: string, item: Regist
       : `/docs/${systemId}/${sectionId}/${item.slug}`;
 
   return {
-    title: item.title,
+    title: getSystemItemTitle(systemId, item) ?? item.title,
     href,
-    status: item.status,
+    status: getSystemItemStatus(systemId, item),
     children: item.children?.map((child) => ({
-      title: child.title,
+      title: getSystemItemTitle(systemId, child) ?? child.title,
       href: `${href}/${child.slug}`,
-      status: child.status,
+      status: getSystemItemStatus(systemId, child),
     })),
   };
 }
