@@ -43,6 +43,7 @@
 
 .theme-midnight {
   --color-canvas: 12 17 16;
+  --color-background: 12 17 16;
   --color-surface: 17 24 23;
   --color-elevated: 23 33 31;
   --color-border: 39 54 50;

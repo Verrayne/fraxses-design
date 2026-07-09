@@ -6,6 +6,7 @@ export default {
     extend: {
       colors: {
         canvas: "rgb(var(--color-canvas) / <alpha-value>)",
+        background: "rgb(var(--color-background) / <alpha-value>)",
         surface: "rgb(var(--color-surface) / <alpha-value>)",
         elevated: "rgb(var(--color-elevated) / <alpha-value>)",
         border: "rgb(var(--color-border) / <alpha-value>)",

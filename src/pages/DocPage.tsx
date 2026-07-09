@@ -2,6 +2,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowUpRight, Figma } from "lucide-react";
 import type { ReactNode } from "react";
 import { ComponentDocSections, componentDocs } from "../content/componentDocs";
+import { designSystems, type DesignSystemId } from "../content/navigation";
 import { patternDocs } from "../content/patterns";
 import { radiusTokens, shadowTokens, spacingTokens, themes } from "../content/tokens";
 import { PreviewCard } from "../components/docs/PreviewCard";
@@ -10,15 +11,30 @@ import { Button, Card, Input, SelectPreview, TabsPreview } from "../components/u
 import { IntendaLightGreenColourUsagePage } from "./ColourUsagePage";
 
 export function DocPage() {
-  const { section = "overview", slug = "overview", topic } = useParams();
-  const key = section === "overview" ? "overview" : slug;
+  const { designSystem, section, slug, topic } = useParams();
 
-  if (section === "components" && componentDocs[key]) {
+  if (designSystem !== "intenda" && designSystem !== "oryx") {
+    return <Navigate to={legacyRedirectPath(designSystem, section, slug, topic)} replace />;
+  }
+
+  const activeDesignSystem = designSystem as DesignSystemId;
+  const activeSection = section ?? "overview";
+  const key = activeSection === "overview" ? "overview" : slug ?? "overview";
+
+  if (activeDesignSystem === "oryx") {
+    return <OryxPage section={activeSection} slug={slug} />;
+  }
+
+  if (activeSection === "overview") {
+    return <IntendaOverviewPage />;
+  }
+
+  if (activeSection === "components" && componentDocs[key]) {
     const doc = componentDocs[key];
     return <PageShell eyebrow="Components" title={doc.title} description={doc.description}><ComponentDocSections doc={doc} /></PageShell>;
   }
 
-  if (section === "patterns" && patternDocs[key]) {
+  if (activeSection === "patterns" && patternDocs[key]) {
     const doc = patternDocs[key];
     return (
       <PageShell eyebrow="Patterns" title={doc.title} description={doc.description}>
@@ -31,19 +47,15 @@ export function DocPage() {
     );
   }
 
-  if (section === "themes") {
+  if (activeSection === "themes") {
     return <ThemePage slug={key} topic={topic} />;
   }
 
-  if (section === "foundations") {
+  if (activeSection === "foundations") {
     return <FoundationPage slug={key} />;
   }
 
-  if (section === "resources") {
-    return <ResourcesPage slug={key} />;
-  }
-
-  return <OverviewPage />;
+  return <Navigate to="/docs/intenda/overview" replace />;
 }
 
 function PageShell({ eyebrow, title, description, children }: { eyebrow: string; title: string; description: string; children: ReactNode }) {
@@ -59,12 +71,12 @@ function PageShell({ eyebrow, title, description, children }: { eyebrow: string;
   );
 }
 
-function OverviewPage() {
+function IntendaOverviewPage() {
   return (
     <PageShell
-      eyebrow="Design Guide"
-      title="Fraxses Design Guide and UI Kit"
-      description="A documentation-first catalogue for Fraxses foundations, themes, components and product patterns. It starts with the current Intenda green token direction and is structured so new components and themes can be added without reworking the site."
+      eyebrow="Intenda"
+      title="Intenda design system"
+      description="The modern Fraxses design system: a token-driven catalogue for enterprise interfaces, data-heavy workflows, theming, components and product patterns."
     >
       <PreviewCard title="System Preview">
         <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
@@ -91,12 +103,12 @@ function OverviewPage() {
       </PreviewCard>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
-          ["Foundations", "Core type, spacing, radius and shadow decisions."],
-          ["Themes", "Documented theme tokens for Intenda Light - Green and Midnight."],
+          ["Foundations", "Core colour, type, spacing, radius and shadow decisions."],
+          ["Themes", "Theme tokens and usage guidance for Intenda Light - Green and Midnight."],
           ["Components", "Live previews, variants, states, code and guidance."],
           ["Patterns", "Fraxses product workflows for data-heavy screens."],
         ].map(([title, text]) => (
-          <Link key={title} to={`/docs/${title.toLowerCase() === "foundations" ? "foundations/typography" : title.toLowerCase() === "themes" ? "themes/intenda-light-green/colour-usage" : title.toLowerCase() === "components" ? "components/buttons" : "patterns/dashboard"}`} className="rounded-lg border border-border bg-surface p-4 transition hover:border-primary hover:shadow-soft">
+          <Link key={title} to={`/docs/intenda/${title.toLowerCase() === "foundations" ? "foundations/colours" : title.toLowerCase() === "themes" ? "themes/intenda-light-green/colour-usage" : title.toLowerCase() === "components" ? "components/buttons" : "patterns/dashboard"}`} className="rounded-lg border border-border bg-surface p-4 transition hover:border-primary hover:shadow-soft">
             <h2 className="text-base">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-subtle">{text}</p>
           </Link>
@@ -107,11 +119,8 @@ function OverviewPage() {
 }
 
 function FoundationPage({ slug }: { slug: string }) {
-  if (slug === "colours") {
-    return <Navigate to="/docs/themes/intenda-light-green/colour-usage" replace />;
-  }
-
   const titles: Record<string, string> = {
+    colours: "Colours",
     typography: "Typography",
     spacing: "Spacing",
     radius: "Radius",
@@ -121,10 +130,45 @@ function FoundationPage({ slug }: { slug: string }) {
   return (
     <PageShell eyebrow="Foundations" title={titles[slug] ?? "Foundations"} description="Foundational decisions that keep Fraxses screens consistent, legible and production-friendly. Values are exposed through CSS variables and Tailwind extensions.">
       {slug === "typography" && <TypographyFoundation />}
+      {slug === "colours" && <ColourFoundation />}
       {slug === "spacing" && <SpacingFoundation />}
       {slug === "radius" && <RadiusFoundation />}
       {slug === "shadows" && <ShadowFoundation />}
     </PageShell>
+  );
+}
+
+function ColourFoundation() {
+  return (
+    <div className="space-y-6">
+      <PreviewCard title="Theme-specific colour documentation">
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-background p-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-base">Colours are documented per Intenda theme</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-subtle">
+              Intenda supports multiple themes, so detailed colour usage lives with each theme. Start with
+              Intenda Light - Green for the current default palette and usage guidance.
+            </p>
+          </div>
+          <Link
+            to="/docs/intenda/themes/intenda-light-green/colour-usage"
+            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-ink"
+          >
+            View colour usage
+          </Link>
+        </div>
+      </PreviewCard>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {themes[0].tokens.slice(0, 9).map((token) => (
+          <div key={token.cssVar} className="rounded-lg border border-border bg-surface p-4">
+            <div className="mb-4 h-16 rounded-md border border-border" style={{ backgroundColor: token.value }} />
+            <h2 className="text-base">{token.label}</h2>
+            <p className="mt-1 text-sm text-subtle">{token.description}</p>
+            <code className="mt-3 block text-xs text-primary">{token.cssVar} · {token.value}</code>
+          </div>
+        ))}
+      </section>
+    </div>
   );
 }
 
@@ -228,28 +272,67 @@ function ThemePage({ slug, topic }: { slug: string; topic?: string }) {
   );
 }
 
-function ResourcesPage({ slug }: { slug: string }) {
-  if (slug === "figma-source") {
+function OryxPage({ section, slug }: { section: string; slug?: string }) {
+  if (section === "overview") {
     return (
-      <PageShell eyebrow="Resources" title="Figma Source" description="The design guide is referenced from the Fraxses Figma Design Guide file. The provided node is the cover for the Intenda 3 Design Library.">
-        <a className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium hover:bg-elevated" href="https://www.figma.com/design/swjGUNj0dztirocm1n5e7j/Design-Guide?node-id=36-2&p=f&t=R74OpPXpqIYKdHuZ-0" target="_blank" rel="noreferrer">
-          <Figma size={16} /> Open Figma source <ArrowUpRight size={14} />
-        </a>
-        <PreviewCard title="Implementation Notes">
-          <p className="max-w-3xl text-sm leading-7 text-subtle">The connector exposed the cover frame metadata. Exact app theme tokens can be updated in the token registry without changing route, layout or component documentation code.</p>
+      <PageShell
+        eyebrow="Oryx"
+        title="Oryx design system"
+        description="The established Fraxses design system. This structure is ready for migration from the Oryx design guide without inventing component specifications or colour values."
+      >
+        <PreviewCard title="Source design library">
+          <div className="space-y-4">
+            <p className="max-w-3xl text-sm leading-7 text-subtle">
+              Oryx documentation will be migrated section by section from the source Figma design guide.
+              Values and specifications are intentionally left out until they are documented from source.
+            </p>
+            <a
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-elevated"
+              href={designSystems.oryx.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Figma size={16} /> Open Oryx Figma source <ArrowUpRight size={14} />
+            </a>
+          </div>
         </PreviewCard>
       </PageShell>
     );
   }
 
+  const sectionTitle = titleCase(section);
+  const pageTitle = slug ? titleCase(slug.replace(/-/g, " ")) : sectionTitle;
   return (
-    <PageShell eyebrow="Resources" title="Contribution Notes" description="How to extend this UI kit without making the guide harder to maintain.">
-      <ul className="guide-list">
-        <li>Add new routes in <code>src/content/navigation.ts</code>.</li>
-        <li>Add component pages to <code>src/content/componentDocs.tsx</code>.</li>
-        <li>Add or replace theme values in <code>src/content/tokens.ts</code>.</li>
-        <li>Keep live previews small, focused and representative of product use.</li>
-      </ul>
+    <PageShell
+      eyebrow={`Oryx / ${sectionTitle}`}
+      title={pageTitle}
+      description="Placeholder documentation page for the Oryx design system. Specifications will be added from the Oryx Figma design guide in a follow-up migration."
+    >
+      <PreviewCard title="Migration placeholder">
+        <div className="rounded-lg border border-dashed border-border bg-background p-6">
+          <h2 className="text-base">No Oryx specifications added yet</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-subtle">
+            This page exists to reserve the Oryx documentation structure. It does not invent colours,
+            component behaviour, spacing, states or pattern guidance.
+          </p>
+        </div>
+      </PreviewCard>
     </PageShell>
   );
+}
+
+function legacyRedirectPath(designSystem?: string, section?: string, slug?: string, topic?: string) {
+  if (!designSystem || designSystem === "overview") {
+    return "/docs/intenda/overview";
+  }
+
+  const parts = [designSystem, section, slug, topic].filter(Boolean);
+  return `/docs/intenda/${parts.join("/")}`;
+}
+
+function titleCase(value: string) {
+  return value
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }

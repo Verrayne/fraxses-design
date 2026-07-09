@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { App } from "./App";
 import { DocPage } from "./pages/DocPage";
-import { routes } from "./content/navigation";
+import { HomePage } from "./pages/HomePage";
 import "./styles.css";
 
 const router = createBrowserRouter([
@@ -11,16 +11,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { index: true, element: <Navigate to="/docs/overview" replace /> },
+      { index: true, element: <HomePage /> },
       {
-        path: "docs/:section?/:slug?/:topic?",
+        path: "docs/:designSystem?/:section?/:slug?/:topic?",
         element: <DocPage />,
       },
     ],
   },
   {
     path: "*",
-    element: <Navigate to={routes[0].items[0].href} replace />,
+    element: <Navigate to="/" replace />,
   },
 ]);
 
