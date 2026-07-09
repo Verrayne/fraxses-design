@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+.theme-intenda-green {
+  --color-canvas: 246 248 245;
+  --color-surface: 255 255 255;
+  --color-elevated: 240 245 238;
+  --color-border: 216 226 212;
+  --color-muted: 232 239 229;
+  --color-ink: 18 32 23;
+  --color-subtle: 92 108 97;
+  --color-primary: 38 107 70;
+  --color-primary-ink: 247 255 248;
+  --color-accent: 143 191 80;
+  --color-success: 24 121 78;
+  --color-warning: 173 107 0;
+  --color-danger: 180 35 24;
+  --radius-md: 6px;
+  --shadow-soft: 0 8px 24px rgba(18, 32, 23, 0.08);
+  --shadow-lifted: 0 18px 54px rgba(18, 32, 23, 0.14);
+  color-scheme: light;
+}
+
+.theme-midnight {
+  --color-canvas: 12 17 16;
+  --color-surface: 17 24 23;
+  --color-elevated: 23 33 31;
+  --color-border: 39 54 50;
+  --color-muted: 30 43 40;
+  --color-ink: 237 245 239;
+  --color-subtle: 154 171 161;
+  --color-primary: 124 197 141;
+  --color-primary-ink: 8 18 12;
+  --color-accent: 183 215 124;
+  --color-success: 105 211 145;
+  --color-warning: 240 179 90;
+  --color-danger: 255 138 128;
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-lifted: 0 18px 54px rgba(0, 0, 0, 0.42);
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: rgb(var(--color-canvas));
+}
+
+h1 {
+  font-size: clamp(2.25rem, 4vw, 4.25rem);
+  line-height: 0.98;
+  font-weight: 720;
+  letter-spacing: 0;
+}
+
+h2 {
+  font-size: 1.25rem;
+  line-height: 1.35;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+code,
+pre {
+  font-family: "JetBrains Mono", SFMono-Regular, Consolas, monospace;
+}
+
+.doc-flow {
+  display: grid;
+  gap: 2rem;
+}
+
+.doc-flow section {
+  min-width: 0;
+}
+
+.guide-list {
+  display: grid;
+  gap: 0.6rem;
+  color: rgb(var(--color-subtle));
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.guide-list li {
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.guide-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgb(var(--color-primary));
+}
