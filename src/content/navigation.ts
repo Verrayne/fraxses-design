@@ -32,7 +32,6 @@ export const routes: NavSection[] = [
     title: "Foundations",
     icon: Layers3,
     items: [
-      { title: "Colours", href: "/docs/foundations/colours" },
       { title: "Typography", href: "/docs/foundations/typography" },
       { title: "Spacing", href: "/docs/foundations/spacing" },
       { title: "Radius", href: "/docs/foundations/radius" },

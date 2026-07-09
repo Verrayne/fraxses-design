@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowUpRight, Figma } from "lucide-react";
 import type { ReactNode } from "react";
 import { ComponentDocSections, componentDocs } from "../content/componentDocs";
@@ -91,12 +91,12 @@ function OverviewPage() {
       </PreviewCard>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
-          ["Foundations", "Core colour, type, spacing, radius and shadow decisions."],
+          ["Foundations", "Core type, spacing, radius and shadow decisions."],
           ["Themes", "Documented theme tokens for Intenda Light - Green and Midnight."],
           ["Components", "Live previews, variants, states, code and guidance."],
           ["Patterns", "Fraxses product workflows for data-heavy screens."],
         ].map(([title, text]) => (
-          <Link key={title} to={`/docs/${title.toLowerCase() === "foundations" ? "foundations/colours" : title.toLowerCase() === "themes" ? "themes/intenda-light-green" : title.toLowerCase() === "components" ? "components/buttons" : "patterns/dashboard"}`} className="rounded-lg border border-border bg-surface p-4 transition hover:border-primary hover:shadow-soft">
+          <Link key={title} to={`/docs/${title.toLowerCase() === "foundations" ? "foundations/typography" : title.toLowerCase() === "themes" ? "themes/intenda-light-green/colour-usage" : title.toLowerCase() === "components" ? "components/buttons" : "patterns/dashboard"}`} className="rounded-lg border border-border bg-surface p-4 transition hover:border-primary hover:shadow-soft">
             <h2 className="text-base">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-subtle">{text}</p>
           </Link>
@@ -107,8 +107,11 @@ function OverviewPage() {
 }
 
 function FoundationPage({ slug }: { slug: string }) {
+  if (slug === "colours") {
+    return <Navigate to="/docs/themes/intenda-light-green/colour-usage" replace />;
+  }
+
   const titles: Record<string, string> = {
-    colours: "Colours",
     typography: "Typography",
     spacing: "Spacing",
     radius: "Radius",
@@ -117,28 +120,11 @@ function FoundationPage({ slug }: { slug: string }) {
 
   return (
     <PageShell eyebrow="Foundations" title={titles[slug] ?? "Foundations"} description="Foundational decisions that keep Fraxses screens consistent, legible and production-friendly. Values are exposed through CSS variables and Tailwind extensions.">
-      {slug === "colours" && <ColourFoundation />}
       {slug === "typography" && <TypographyFoundation />}
       {slug === "spacing" && <SpacingFoundation />}
       {slug === "radius" && <RadiusFoundation />}
       {slug === "shadows" && <ShadowFoundation />}
     </PageShell>
-  );
-}
-
-function ColourFoundation() {
-  const defaultTheme = themes[0];
-  return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {defaultTheme.tokens.map((token) => (
-        <div key={token.cssVar} className="rounded-lg border border-border bg-surface p-4">
-          <div className="mb-4 h-20 rounded-md border border-border" style={{ backgroundColor: token.value }} />
-          <h2 className="text-base">{token.label}</h2>
-          <p className="mt-1 text-sm text-subtle">{token.description}</p>
-          <code className="mt-3 block text-xs text-primary">{token.cssVar} · {token.value}</code>
-        </div>
-      ))}
-    </section>
   );
 }
 
