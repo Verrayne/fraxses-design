@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { App } from "./App";
 import { DocPage } from "./pages/DocPage";
 import { HomePage } from "./pages/HomePage";
+import "./generated-tailwind.css";
 import "./styles.css";
 
 const router = createBrowserRouter([
@@ -13,7 +14,19 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       {
-        path: "docs/:designSystem?/:section?/:slug?/:topic?",
+        path: "docs/intenda/:section?/:slug?/:topic?",
+        element: <DocPage />,
+      },
+      {
+        path: "docs/oryx/:section?/:slug?/:topic?",
+        element: <DocPage />,
+      },
+      {
+        path: "docs/:section?/:slug?/:topic?",
+        element: <DocPage />,
+      },
+      {
+        path: "themes/:themeId",
         element: <DocPage />,
       },
     ],

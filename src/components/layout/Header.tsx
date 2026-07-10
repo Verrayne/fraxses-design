@@ -3,8 +3,8 @@ import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/92 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-[1680px] items-center gap-4 px-5">
+    <header className="sticky top-0 z-30 border-b border-border bg-elevated">
+      <div className="flex h-16 w-full items-center gap-4 px-5">
         <a href="/" className="flex items-center gap-3 font-semibold">
           <span className="grid h-8 w-8 place-items-center rounded-md bg-primary text-sm text-primary-ink">Fx</span>
           <span>Fraxses Design</span>
