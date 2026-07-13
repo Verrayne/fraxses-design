@@ -872,10 +872,15 @@ function BarChartPreview({ mode = "bar" }: { mode?: "bar" | "multi-bar" | "stack
   const barWidth = mode === "multi-bar" ? 18 : 34;
   const ticks = [0, 200, 400, 600, 800];
   const series = chartSeries.slice(0, 8);
+  const legend = [
+    { label: "Mobile", colour: "var(--chart-1)" },
+    { label: "Desktop", colour: "var(--chart-2)" },
+    { label: "API", colour: "var(--chart-3)" },
+  ];
 
   return (
     <div className="w-full">
-      <svg className="block h-80 w-full overflow-visible" role="img" aria-label={`${mode} chart showing object counts`} viewBox={`0 0 ${width} ${height}`}>
+      <svg className={mode === "multi-bar" ? "block h-96 w-full overflow-visible" : "block h-80 w-full overflow-visible"} role="img" aria-label={`${mode} chart showing object counts`} viewBox={`0 0 ${width} ${mode === "multi-bar" ? 360 : height}`}>
         {ticks.map((tick) => {
           const y = padding.top + plotHeight - (tick / maxValue) * plotHeight;
           return (
@@ -903,8 +908,22 @@ function BarChartPreview({ mode = "bar" }: { mode?: "bar" | "multi-bar" | "stack
             </g>
           );
         })}
+        {mode === "multi-bar" && <SvgLegend items={legend} startX={318} y={332} />}
       </svg>
     </div>
+  );
+}
+
+function SvgLegend({ items, startX, y, gap = 120 }: { items: Array<{ label: string; colour: string }>; startX: number; y: number; gap?: number }) {
+  return (
+    <g transform={`translate(${startX} ${y})`}>
+      {items.map((item, index) => (
+        <g key={item.label} transform={`translate(${index * gap} 0)`}>
+          <circle cx="0" cy="0" fill={item.colour} r="4" />
+          <text fill="var(--foreground-subtle)" fontSize="12" x="12" y="4">{item.label}</text>
+        </g>
+      ))}
+    </g>
   );
 }
 
@@ -1020,6 +1039,7 @@ function linePoints(values: number[], width = 920, height = 320, compact = false
 function LineChartPreview({ mode }: { mode: "line" | "area" | "sparkline" }) {
   const width = 920;
   const height = mode === "sparkline" ? 150 : 320;
+  const viewHeight = mode === "line" ? 360 : height;
   const compact = mode === "sparkline";
   const active = chartSeries.map((item) => item.active);
   const previous = chartSeries.map((item) => item.previous);
@@ -1028,7 +1048,7 @@ function LineChartPreview({ mode }: { mode: "line" | "area" | "sparkline" }) {
   const areaPath = `M ${activePoints.replaceAll(" ", " L ")} L 902,282 L 46,282 Z`;
 
   return (
-    <svg className={compact ? "block h-36 w-full" : "block h-80 w-full"} role="img" aria-label={`${mode} chart preview`} viewBox={`0 0 ${width} ${height}`}>
+    <svg className={mode === "line" ? "block h-96 w-full" : compact ? "block h-36 w-full" : "block h-80 w-full"} role="img" aria-label={`${mode} chart preview`} viewBox={`0 0 ${width} ${viewHeight}`}>
       {!compact && [0, 225, 450, 675, 900].map((tick) => {
         const y = 18 + (264 - (tick / 900) * 264);
         return (
@@ -1043,6 +1063,7 @@ function LineChartPreview({ mode }: { mode: "line" | "area" | "sparkline" }) {
       {mode === "line" && <polyline fill="none" points={linePoints(previous, width, height)} stroke="var(--chart-2)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />}
       {mode === "line" && <polyline fill="none" points={linePoints(desktop, width, height)} stroke="var(--chart-3)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />}
       {!compact && chartSeries.map((item, index) => <text fill="var(--foreground-subtle)" fontSize="12" key={item.name} textAnchor="middle" x={46 + (index / 11) * 856} y="308">{index % 2 === 0 ? item.name : ""}</text>)}
+      {mode === "line" && <SvgLegend items={[{ label: "Active", colour: "var(--chart-1)" }, { label: "Previous", colour: "var(--chart-2)" }, { label: "Desktop", colour: "var(--chart-3)" }]} startX={312} y={340} />}
     </svg>
   );
 }
@@ -1068,23 +1089,28 @@ function PieChartPreview({ mode }: { mode: "pie" | "donut" }) {
 
   return (
     <div className="relative grid h-80 place-items-center">
-      <svg className="h-64 w-64 overflow-visible" role="img" aria-label={`${mode} chart preview`} viewBox="0 0 240 240">
-        {slices.map((slice, index) => (
-          <path
-            aria-label={`${slice.name}: ${slice.value}`}
-            className="cursor-pointer outline-none transition-opacity hover:opacity-80 focus:opacity-80"
-            d={slice.path}
-            fill={slice.colour}
-            key={slice.name}
-            onBlur={() => setHovered(null)}
-            onFocus={() => setHovered(index)}
-            onMouseEnter={() => setHovered(index)}
-            onMouseLeave={() => setHovered(null)}
-            tabIndex={0}
-          />
-        ))}
-        {donut && <circle cx="120" cy="120" fill="var(--surface-raised)" r="58" pointerEvents="none" />}
-      </svg>
+      <div className="grid place-items-center gap-3">
+        <svg className="h-64 w-64 overflow-visible" role="img" aria-label={`${mode} chart preview`} viewBox="0 0 240 240">
+          {slices.map((slice, index) => (
+            <path
+              aria-label={`${slice.name}: ${slice.value}`}
+              className="cursor-pointer outline-none transition-opacity hover:opacity-80 focus:opacity-80"
+              d={slice.path}
+              fill={slice.colour}
+              key={slice.name}
+              onBlur={() => setHovered(null)}
+              onFocus={() => setHovered(index)}
+              onMouseEnter={() => setHovered(index)}
+              onMouseLeave={() => setHovered(null)}
+              tabIndex={0}
+            />
+          ))}
+          {donut && <circle cx="120" cy="120" fill="var(--surface-raised)" r="58" pointerEvents="none" />}
+        </svg>
+        <svg className="h-5 w-80" aria-hidden="true" viewBox="0 0 320 20">
+          <SvgLegend items={slices.map((slice) => ({ label: slice.name, colour: slice.colour }))} startX={22} y={10} gap={100} />
+        </svg>
+      </div>
       {activeSlice && (
         <div className="pointer-events-none absolute right-[18%] top-1/2 rounded-lg border border-border bg-elevated px-4 py-3 text-sm shadow-raised">
           <p className="mb-2 font-medium">{activeSlice.name}</p>
