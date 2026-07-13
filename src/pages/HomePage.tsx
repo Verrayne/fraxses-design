@@ -26,20 +26,28 @@ export function HomePage() {
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {themes.map((theme) => (
           <article key={theme.id} className="rounded-2xl border border-border bg-elevated p-5 shadow-soft">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-xl">{theme.name}</h2>
-                <p className="mt-2 text-sm leading-6 text-subtle">{theme.description}</p>
-              </div>
-              <Badge tone={theme.status === "Available" ? "success" : "warning"} variant="soft">{theme.status}</Badge>
+            <div className="mb-4">
+              <h2 className="text-xl">{theme.name}</h2>
+              <p className="mt-2 text-sm leading-6 text-subtle">{theme.description}</p>
             </div>
             <ThemeMiniPreview theme={theme} />
+            {theme.id === "midnight" || theme.id === "ocean" ? (
+              <button
+                className="mt-5 inline-flex h-10 w-full cursor-not-allowed items-center justify-center rounded-md border border-border bg-muted px-4 text-sm font-semibold text-subtle opacity-70"
+                disabled
+                type="button"
+              >
+                Coming soon
+              </button>
+            ) : (
             <button
               className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-ink transition hover:bg-primary/90"
               onClick={() => chooseTheme(theme.id)}
+              type="button"
             >
-              Browse in this theme
+              Continue
             </button>
+            )}
           </article>
         ))}
       </section>
