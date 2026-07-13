@@ -654,7 +654,7 @@ function componentTokenItems(slug: string) {
   return ["--foreground", "--foreground-subtle", "--border", "--focus-ring"];
 }
 
-type ChartType = "bar" | "multi-bar" | "stacked-bar" | "line" | "sparkline" | "area" | "pie" | "donut" | "scatter" | "gauge" | "radar" | "heatmap" | "funnel" | "sankey" | "map";
+type ChartType = "metric-basic" | "metric-change" | "metric-spark" | "metric-area" | "metric-bar" | "bar" | "multi-bar" | "stacked-bar" | "line" | "sparkline" | "area" | "pie" | "donut" | "scatter" | "gauge" | "radar" | "heatmap" | "funnel" | "sankey";
 
 const chartSeries = [
   { name: "Jan", mobile: 420, desktop: 280, api: 180, active: 600, previous: 410 },
@@ -670,6 +670,8 @@ const chartSeries = [
   { name: "Nov", mobile: 630, desktop: 410, api: 280, active: 780, previous: 480 },
   { name: "Dec", mobile: 710, desktop: 470, api: 350, active: 820, previous: 500 },
 ];
+
+const barChartData = chartSeries.slice(0, 8).map(({ name, mobile }) => ({ name, value: mobile }));
 
 const chartSegments = [
   { name: "Mobile", value: 145 },
@@ -687,12 +689,6 @@ const funnelData = [
 ];
 const heatmapRows = ["Sources", "Objects", "Queries", "Jobs"];
 const heatmapColumns = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const mapRegions = [
-  { name: "North", x: "15%", y: "20%", w: "30%", h: "28%", value: "42" },
-  { name: "East", x: "48%", y: "24%", w: "34%", h: "24%", value: "31" },
-  { name: "South", x: "32%", y: "55%", w: "40%", h: "28%", value: "27" },
-];
-
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name?: string; value?: number | string; color?: string; payload?: { name?: string } }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
@@ -716,14 +712,58 @@ function ChartFrame({ type }: { type: ChartType }) {
   const axis = { tick: { fill: "var(--foreground-subtle)", fontSize: 12 }, axisLine: { stroke: "var(--border)" }, tickLine: false };
   const colours = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 
+  if (type === "metric-basic" || type === "metric-change" || type === "metric-spark" || type === "metric-area" || type === "metric-bar") {
+    return <MetricCardPreview type={type} />;
+  }
+
+  if (type === "bar") {
+    return <BarChartPreview />;
+  }
+
+  if (type === "multi-bar" || type === "stacked-bar") {
+    return <BarChartPreview mode={type} />;
+  }
+
+  if (type === "line" || type === "area" || type === "sparkline") {
+    return <LineChartPreview mode={type} />;
+  }
+
+  if (type === "pie" || type === "donut") {
+    return <PieChartPreview mode={type} />;
+  }
+
+  if (type === "scatter") {
+    return <ScatterChartPreview />;
+  }
+
+  if (type === "gauge") {
+    return <GaugeChartPreview />;
+  }
+
+  if (type === "radar") {
+    return <RadarChartPreview />;
+  }
+
+  if (type === "heatmap") {
+    return <HeatmapChartPreview />;
+  }
+
+  if (type === "funnel") {
+    return <FunnelChartPreview />;
+  }
+
+  if (type === "sankey") {
+    return <SankeyChartPreview />;
+  }
+
   if (type === "sparkline") {
-    return <div className="h-32"><ResponsiveContainer><RechartsLineChart data={chartSeries}><Tooltip content={<ChartTooltip />} /><Line dataKey="active" type="monotone" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} /></RechartsLineChart></ResponsiveContainer></div>;
+    return <div className="h-32 w-full"><ResponsiveContainer width="100%" height="100%"><RechartsLineChart data={chartSeries}><Tooltip content={<ChartTooltip />} /><Line dataKey="active" type="monotone" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} /></RechartsLineChart></ResponsiveContainer></div>;
   }
 
   if (type === "pie" || type === "donut") {
     return (
-      <div className="h-80">
-        <ResponsiveContainer>
+      <div className="h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Tooltip content={<ChartTooltip />} />
             <Pie data={chartSegments} dataKey="value" nameKey="name" innerRadius={type === "donut" ? 82 : 0} outerRadius={116} paddingAngle={type === "donut" ? 3 : 1}>
@@ -737,8 +777,8 @@ function ChartFrame({ type }: { type: ChartType }) {
 
   if (type === "gauge") {
     return (
-      <div className="h-72">
-        <ResponsiveContainer>
+      <div className="h-72 w-full">
+        <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart cx="50%" cy="70%" innerRadius="72%" outerRadius="100%" barSize={18} data={[{ name: "Health", value: 76, fill: "var(--chart-1)" }]} startAngle={180} endAngle={0}>
             <RadialBar dataKey="value" cornerRadius={999} background={{ fill: "var(--surface-active)" }} />
             <text x="50%" y="64%" textAnchor="middle" fill="var(--foreground)" className="text-3xl font-semibold">76%</text>
@@ -750,29 +790,21 @@ function ChartFrame({ type }: { type: ChartType }) {
   }
 
   if (type === "radar") {
-    return <div className="h-80"><ResponsiveContainer><RadarChart data={radarData}><PolarGrid stroke="var(--border)" /><PolarAngleAxis dataKey="name" tick={{ fill: "var(--foreground-subtle)", fontSize: 12 }} /><PolarRadiusAxis tick={false} axisLine={false} /><Radar dataKey="target" stroke="var(--chart-4)" fill="var(--chart-4)" fillOpacity={0.16} /><Radar dataKey="current" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.28} /><Tooltip content={<ChartTooltip />} /></RadarChart></ResponsiveContainer></div>;
-  }
-
-  if (type === "heatmap") {
-    return <div className="grid gap-2">{heatmapRows.map((row, rowIndex) => <div className="grid grid-cols-[88px_repeat(7,minmax(0,1fr))] gap-2" key={row}><span className="text-sm text-subtle">{row}</span>{heatmapColumns.map((column, columnIndex) => <span className="h-10 rounded-md border border-border" key={column} title={`${row} ${column}`} style={{ background: `color-mix(in srgb, var(--chart-${((rowIndex + columnIndex) % 5) + 1}) ${28 + rowIndex * 12 + columnIndex * 4}%, var(--surface-raised))` }} />)}</div>)}</div>;
+    return <div className="h-80 w-full"><ResponsiveContainer width="100%" height="100%"><RadarChart data={radarData}><PolarGrid stroke="var(--border)" /><PolarAngleAxis dataKey="name" tick={{ fill: "var(--foreground-subtle)", fontSize: 12 }} /><PolarRadiusAxis tick={false} axisLine={false} /><Radar dataKey="target" stroke="var(--chart-4)" fill="var(--chart-4)" fillOpacity={0.16} /><Radar dataKey="current" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.28} /><Tooltip content={<ChartTooltip />} /></RadarChart></ResponsiveContainer></div>;
   }
 
   if (type === "funnel") {
-    return <div className="h-80"><ResponsiveContainer><FunnelChart><Tooltip content={<ChartTooltip />} /><Funnel dataKey="value" data={funnelData} isAnimationActive><LabelList position="right" fill="var(--foreground)" stroke="none" dataKey="name" /></Funnel></FunnelChart></ResponsiveContainer></div>;
+    return <div className="h-80 w-full"><ResponsiveContainer width="100%" height="100%"><FunnelChart><Tooltip content={<ChartTooltip />} /><Funnel dataKey="value" data={funnelData} isAnimationActive><LabelList position="right" fill="var(--foreground)" stroke="none" dataKey="name" /></Funnel></FunnelChart></ResponsiveContainer></div>;
   }
 
   if (type === "sankey") {
     const data = { nodes: [{ name: "Sources" }, { name: "Objects" }, { name: "Queries" }, { name: "Dashboards" }, { name: "Jobs" }], links: [{ source: 0, target: 1, value: 180 }, { source: 1, target: 2, value: 110 }, { source: 1, target: 3, value: 70 }, { source: 0, target: 4, value: 40 }] };
-    return <div className="h-80"><ResponsiveContainer><Sankey data={data} nodePadding={22} nodeWidth={14} link={{ stroke: "var(--chart-2)", strokeOpacity: 0.28 }} node={{ fill: "var(--chart-1)", stroke: "var(--surface-raised)" }}><Tooltip content={<ChartTooltip />} /></Sankey></ResponsiveContainer></div>;
-  }
-
-  if (type === "map") {
-    return <div className="relative h-80 overflow-hidden rounded-xl border border-border bg-surface p-6">{mapRegions.map((region, index) => <div key={region.name} className="absolute rounded-2xl border border-border p-4 shadow-soft transition hover:-translate-y-0.5" style={{ left: region.x, top: region.y, width: region.w, height: region.h, background: `color-mix(in srgb, var(--chart-${index + 1}) 34%, var(--surface-raised))` }}><p className="font-medium">{region.name}</p><p className="text-2xl font-semibold">{region.value}</p></div>)}</div>;
+    return <div className="h-80 w-full"><ResponsiveContainer width="100%" height="100%"><Sankey data={data} nodePadding={22} nodeWidth={14} link={{ stroke: "var(--chart-2)", strokeOpacity: 0.28 }} node={{ fill: "var(--chart-1)", stroke: "var(--surface-raised)" }}><Tooltip content={<ChartTooltip />} /></Sankey></ResponsiveContainer></div>;
   }
 
   return (
-    <div className="h-80">
-      <ResponsiveContainer>
+    <div className="h-80 w-full">
+      <ResponsiveContainer width="100%" height="100%">
         {type === "line" ? (
           <RechartsLineChart data={chartSeries}>{grid}<XAxis dataKey="name" {...axis} /><YAxis {...axis} /><Tooltip content={<ChartTooltip />} /><Line dataKey="active" type="monotone" stroke="var(--chart-1)" strokeWidth={2} dot={false} /><Line dataKey="previous" type="monotone" stroke="var(--chart-2)" strokeWidth={2} dot={false} /><Line dataKey="desktop" type="monotone" stroke="var(--chart-3)" strokeWidth={2} dot={false} /></RechartsLineChart>
         ) : type === "area" ? (
@@ -780,18 +812,600 @@ function ChartFrame({ type }: { type: ChartType }) {
         ) : type === "scatter" ? (
           <ScatterChart>{grid}<XAxis dataKey="x" name="Mobile" {...axis} /><YAxis dataKey="y" name="Desktop" {...axis} /><ZAxis dataKey="z" range={[80, 280]} /><Tooltip content={<ChartTooltip />} /><Scatter data={scatterData} fill="var(--chart-1)" /></ScatterChart>
         ) : (
-          <RechartsBarChart data={chartSeries}>{grid}<XAxis dataKey="name" {...axis} /><YAxis {...axis} /><Tooltip content={<ChartTooltip />} />{type === "bar" && <Bar dataKey="mobile" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />}{type === "multi-bar" && <><Bar dataKey="mobile" fill="var(--chart-1)" radius={[4, 4, 0, 0]} /><Bar dataKey="desktop" fill="var(--chart-2)" radius={[4, 4, 0, 0]} /><Bar dataKey="api" fill="var(--chart-3)" radius={[4, 4, 0, 0]} /></>}{type === "stacked-bar" && <><Bar dataKey="mobile" stackId="a" fill="var(--chart-1)" /><Bar dataKey="desktop" stackId="a" fill="var(--chart-2)" /><Bar dataKey="api" stackId="a" fill="var(--chart-3)" radius={[4, 4, 0, 0]} /></>}</RechartsBarChart>
+          <RechartsBarChart data={type === "bar" ? barChartData : chartSeries}>{grid}<XAxis dataKey="name" {...axis} /><YAxis {...axis} /><Tooltip content={<ChartTooltip />} />{type === "bar" && <Bar dataKey="value" name="Objects" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />}{type === "multi-bar" && <><Bar dataKey="mobile" fill="var(--chart-1)" radius={[4, 4, 0, 0]} /><Bar dataKey="desktop" fill="var(--chart-2)" radius={[4, 4, 0, 0]} /><Bar dataKey="api" fill="var(--chart-3)" radius={[4, 4, 0, 0]} /></>}{type === "stacked-bar" && <><Bar dataKey="mobile" stackId="a" fill="var(--chart-1)" /><Bar dataKey="desktop" stackId="a" fill="var(--chart-2)" /><Bar dataKey="api" stackId="a" fill="var(--chart-3)" radius={[4, 4, 0, 0]} /></>}</RechartsBarChart>
         )}
       </ResponsiveContainer>
     </div>
   );
 }
 
+function MetricCardPreview({ type }: { type: Extract<ChartType, "metric-basic" | "metric-change" | "metric-spark" | "metric-area" | "metric-bar"> }) {
+  const showChange = type !== "metric-basic";
+  const showSpark = type === "metric-spark";
+  const showArea = type === "metric-area";
+  const showBar = type === "metric-bar";
+  const metricValues = [24, 32, 28, 44, 38, 52, 48, 61, 56, 68, 73, 78];
+  const points = metricValues.map((value, index) => `${18 + index * 24},${58 - value * 0.46}`).join(" ");
+  const areaPath = `M ${points.replaceAll(" ", " L ")} L 282 64 L 18 64 Z`;
+
+  return (
+    <div className="flex min-h-64 items-center justify-center p-4">
+      <div className="w-full max-w-xs rounded-xl border border-border bg-elevated p-5 shadow-soft">
+        <p className="text-sm font-medium text-subtle">Total Sources</p>
+        <p className="mt-4 text-[36px] font-semibold leading-none tracking-normal text-ink">4</p>
+        {showChange && (
+          <p className="mt-2 text-sm font-medium text-success">
+            +2 <span className="font-normal">this week</span>
+          </p>
+        )}
+        {(showSpark || showArea || showBar) && (
+          <div className="mt-2 h-14 overflow-hidden">
+            {showBar ? (
+              <svg className="h-full w-full" role="img" aria-label="Metric bar chart preview" viewBox="0 0 300 64">
+                {metricValues.map((value, index) => (
+                  <rect fill="var(--chart-1)" height={value * 0.5} key={index} rx="3" width="14" x={18 + index * 23} y={58 - value * 0.5} />
+                ))}
+              </svg>
+            ) : (
+              <svg className="h-full w-full" role="img" aria-label={showArea ? "Metric area chart preview" : "Metric sparkline preview"} viewBox="0 0 300 64">
+                {showArea && <path d={areaPath} fill="var(--chart-1)" opacity="0.16" />}
+                <polyline fill="none" points={points} stroke="var(--chart-1)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+              </svg>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BarChartPreview({ mode = "bar" }: { mode?: "bar" | "multi-bar" | "stacked-bar" }) {
+  if (mode === "stacked-bar") return <StackedBarChartPreview />;
+
+  const width = 920;
+  const height = 320;
+  const padding = { top: 18, right: 18, bottom: 38, left: 46 };
+  const plotWidth = width - padding.left - padding.right;
+  const plotHeight = height - padding.top - padding.bottom;
+  const maxValue = 800;
+  const step = plotWidth / barChartData.length;
+  const barWidth = mode === "multi-bar" ? 18 : 34;
+  const ticks = [0, 200, 400, 600, 800];
+  const series = chartSeries.slice(0, 8);
+
+  return (
+    <div className="w-full">
+      <svg className="block h-80 w-full overflow-visible" role="img" aria-label={`${mode} chart showing object counts`} viewBox={`0 0 ${width} ${height}`}>
+        {ticks.map((tick) => {
+          const y = padding.top + plotHeight - (tick / maxValue) * plotHeight;
+          return (
+            <g key={tick}>
+              <line stroke="var(--border)" strokeDasharray="4 4" x1={padding.left} x2={width - padding.right} y1={y} y2={y} />
+              <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="end" x={padding.left - 12} y={y + 4}>{tick}</text>
+            </g>
+          );
+        })}
+        <line stroke="var(--border)" x1={padding.left} x2={width - padding.right} y1={padding.top + plotHeight} y2={padding.top + plotHeight} />
+        {series.map((item, index) => {
+          const x = padding.left + index * step + (step - (mode === "multi-bar" ? barWidth * 3 + 8 : barWidth)) / 2;
+          const values = mode === "bar" ? [item.mobile] : [item.mobile, item.desktop, item.api];
+          let stackedOffset = 0;
+          return (
+            <g key={item.name}>
+              {values.map((value, valueIndex) => {
+                const barHeight = (value / maxValue) * plotHeight;
+                const y = padding.top + plotHeight - barHeight - stackedOffset;
+                const rectX = mode === "multi-bar" ? x + valueIndex * (barWidth + 4) : x;
+                if (mode === "stacked-bar") stackedOffset += barHeight;
+                return <rect fill={`var(--chart-${valueIndex + 1})`} height={barHeight} key={`${item.name}-${valueIndex}`} rx="4" width={barWidth} x={rectX} y={y} />;
+              })}
+              <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="middle" x={x + barWidth / 2} y={height - 12}>{item.name}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function StackedBarChartPreview() {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const width = 920;
+  const height = 360;
+  const padding = { top: 18, right: 18, bottom: 76, left: 46 };
+  const plotWidth = width - padding.left - padding.right;
+  const plotHeight = height - padding.top - padding.bottom;
+  const maxValue = 1200;
+  const barWidth = 34;
+  const series = chartSeries.slice(0, 8);
+  const legend = [
+    { key: "mobile", label: "Mobile", colour: "var(--chart-1)" },
+    { key: "desktop", label: "Desktop", colour: "var(--chart-2)" },
+    { key: "api", label: "API", colour: "var(--chart-3)" },
+  ] as const;
+  const step = plotWidth / series.length;
+  const activeItem = hovered === null ? null : series[hovered];
+  const legendWidth = 320;
+  const legendStartX = padding.left + plotWidth / 2 - legendWidth / 2;
+
+  return (
+    <div className="relative w-full">
+      <svg className="block h-96 w-full overflow-visible" role="img" aria-label="Stacked bar chart showing counts by month" viewBox={`0 0 ${width} ${height}`}>
+        {[0, 300, 600, 900, 1200].map((tick) => {
+          const y = padding.top + plotHeight - (tick / maxValue) * plotHeight;
+          return (
+            <g key={tick}>
+              <line stroke="var(--border)" strokeDasharray="4 4" x1={padding.left} x2={width - padding.right} y1={y} y2={y} />
+              <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="end" x={padding.left - 12} y={y + 4}>{tick}</text>
+            </g>
+          );
+        })}
+        <line stroke="var(--border)" x1={padding.left} x2={width - padding.right} y1={padding.top + plotHeight} y2={padding.top + plotHeight} />
+        {series.map((item, index) => {
+          const x = padding.left + index * step + (step - barWidth) / 2;
+          const values = [item.mobile, item.desktop, item.api];
+          let stackedOffset = 0;
+          const total = values.reduce((sum, value) => sum + value, 0);
+          const totalHeight = (total / maxValue) * plotHeight;
+          const hitY = padding.top + plotHeight - totalHeight;
+          return (
+            <g key={item.name}>
+              {values.map((value, valueIndex) => {
+                const barHeight = (value / maxValue) * plotHeight;
+                const y = padding.top + plotHeight - stackedOffset - barHeight;
+                stackedOffset += barHeight;
+                const isTop = valueIndex === values.length - 1;
+                const fill = `var(--chart-${valueIndex + 1})`;
+                return isTop
+                  ? <path d={`M ${x} ${y + 4} Q ${x} ${y} ${x + 4} ${y} H ${x + barWidth - 4} Q ${x + barWidth} ${y} ${x + barWidth} ${y + 4} V ${y + barHeight} H ${x} Z`} fill={fill} key={`${item.name}-${valueIndex}`} />
+                  : <rect fill={fill} height={barHeight} key={`${item.name}-${valueIndex}`} width={barWidth} x={x} y={y} />;
+              })}
+              <rect
+                fill="transparent"
+                height={totalHeight}
+                onBlur={() => setHovered(null)}
+                onFocus={() => setHovered(index)}
+                onMouseEnter={() => setHovered(index)}
+                onMouseLeave={() => setHovered(null)}
+                pointerEvents="all"
+                tabIndex={0}
+                width={barWidth}
+                x={x}
+                y={hitY}
+              />
+              <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="middle" x={x + barWidth / 2} y={padding.top + plotHeight + 20}>{item.name}</text>
+              {hovered === index && <text fill="var(--foreground)" fontSize="12" fontWeight="700" textAnchor="middle" x={x + barWidth / 2} y={hitY - 10}>{total}</text>}
+            </g>
+          );
+        })}
+        <g transform={`translate(${legendStartX} ${height - 28})`}>
+          {legend.map((item, index) => (
+            <g key={item.key} transform={`translate(${index * 120} 0)`}>
+              <circle cx="0" cy="0" fill={item.colour} r="4" />
+              <text fill="var(--foreground-subtle)" fontSize="12" x="12" y="4">{item.label}</text>
+            </g>
+          ))}
+        </g>
+      </svg>
+      {activeItem && (
+        <div className="pointer-events-none absolute rounded-lg border border-border bg-elevated px-4 py-3 text-sm shadow-raised" style={{ left: `${((padding.left + hovered! * step + step / 2) / width) * 100}%`, top: "38px", transform: "translateX(-50%)" }}>
+          <p className="mb-2 font-medium">{activeItem.name}</p>
+          <div className="grid gap-1.5">
+            {legend.map((item) => (
+              <div className="flex items-center gap-2" key={item.key}>
+                <span aria-hidden="true" className="shrink-0 rounded-full" style={{ background: item.colour, height: 9, width: 9 }} />
+                <span>{item.label}</span>
+                <span className="ml-4 font-medium">{activeItem[item.key]}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function linePoints(values: number[], width = 920, height = 320, compact = false) {
+  const padding = compact ? { top: 14, right: 16, bottom: 14, left: 16 } : { top: 18, right: 18, bottom: 38, left: 46 };
+  const plotWidth = width - padding.left - padding.right;
+  const plotHeight = height - padding.top - padding.bottom;
+  const maxValue = 900;
+  return values.map((value, index) => {
+    const x = padding.left + (index / (values.length - 1)) * plotWidth;
+    const y = padding.top + plotHeight - (value / maxValue) * plotHeight;
+    return `${x},${y}`;
+  }).join(" ");
+}
+
+function LineChartPreview({ mode }: { mode: "line" | "area" | "sparkline" }) {
+  const width = 920;
+  const height = mode === "sparkline" ? 150 : 320;
+  const compact = mode === "sparkline";
+  const active = chartSeries.map((item) => item.active);
+  const previous = chartSeries.map((item) => item.previous);
+  const desktop = chartSeries.map((item) => item.desktop);
+  const activePoints = linePoints(active, width, height, compact);
+  const areaPath = `M ${activePoints.replaceAll(" ", " L ")} L 902,282 L 46,282 Z`;
+
+  return (
+    <svg className={compact ? "block h-36 w-full" : "block h-80 w-full"} role="img" aria-label={`${mode} chart preview`} viewBox={`0 0 ${width} ${height}`}>
+      {!compact && [0, 225, 450, 675, 900].map((tick) => {
+        const y = 18 + (264 - (tick / 900) * 264);
+        return (
+          <g key={tick}>
+            <line stroke="var(--border)" strokeDasharray="4 4" x1="46" x2="902" y1={y} y2={y} />
+            <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="end" x="34" y={y + 4}>{tick}</text>
+          </g>
+        );
+      })}
+      {mode === "area" && <path d={areaPath} fill="var(--chart-1)" opacity="0.14" />}
+      <polyline fill="none" points={activePoints} stroke="var(--chart-1)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+      {mode === "line" && <polyline fill="none" points={linePoints(previous, width, height)} stroke="var(--chart-2)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />}
+      {mode === "line" && <polyline fill="none" points={linePoints(desktop, width, height)} stroke="var(--chart-3)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />}
+      {!compact && chartSeries.map((item, index) => <text fill="var(--foreground-subtle)" fontSize="12" key={item.name} textAnchor="middle" x={46 + (index / 11) * 856} y="308">{index % 2 === 0 ? item.name : ""}</text>)}
+    </svg>
+  );
+}
+
+function PieChartPreview({ mode }: { mode: "pie" | "donut" }) {
+  const donut = mode === "donut";
+  const [hovered, setHovered] = useState<number | null>(null);
+  const total = chartSegments.reduce((sum, item) => sum + item.value, 0);
+  let startAngle = -90;
+  const slices = chartSegments.map((item, index) => {
+    const angle = (item.value / total) * 360;
+    const slice = {
+      ...item,
+      colour: `var(--chart-${index + 1})`,
+      path: donut
+        ? donutSlicePath(120, 120, 94, 58, startAngle, startAngle + angle)
+        : pieSlicePath(120, 120, 96, startAngle, startAngle + angle),
+    };
+    startAngle += angle;
+    return slice;
+  });
+  const activeSlice = hovered === null ? null : slices[hovered];
+
+  return (
+    <div className="relative grid h-80 place-items-center">
+      <svg className="h-64 w-64 overflow-visible" role="img" aria-label={`${mode} chart preview`} viewBox="0 0 240 240">
+        {slices.map((slice, index) => (
+          <path
+            aria-label={`${slice.name}: ${slice.value}`}
+            className="cursor-pointer outline-none transition-opacity hover:opacity-80 focus:opacity-80"
+            d={slice.path}
+            fill={slice.colour}
+            key={slice.name}
+            onBlur={() => setHovered(null)}
+            onFocus={() => setHovered(index)}
+            onMouseEnter={() => setHovered(index)}
+            onMouseLeave={() => setHovered(null)}
+            tabIndex={0}
+          />
+        ))}
+        {donut && <circle cx="120" cy="120" fill="var(--surface-raised)" r="58" pointerEvents="none" />}
+      </svg>
+      {activeSlice && (
+        <div className="pointer-events-none absolute right-[18%] top-1/2 rounded-lg border border-border bg-elevated px-4 py-3 text-sm shadow-raised">
+          <p className="mb-2 font-medium">{activeSlice.name}</p>
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: activeSlice.colour }} />
+            <span>{activeSlice.name}</span>
+            <span className="ml-4 font-medium">{activeSlice.value}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function polarPoint(cx: number, cy: number, radius: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  return { x: cx + radius * Math.cos(radians), y: cy + radius * Math.sin(radians) };
+}
+
+function pieSlicePath(cx: number, cy: number, radius: number, startAngle: number, endAngle: number) {
+  const start = polarPoint(cx, cy, radius, startAngle);
+  const end = polarPoint(cx, cy, radius, endAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+}
+
+function donutSlicePath(cx: number, cy: number, outerRadius: number, innerRadius: number, startAngle: number, endAngle: number) {
+  const outerStart = polarPoint(cx, cy, outerRadius, startAngle);
+  const outerEnd = polarPoint(cx, cy, outerRadius, endAngle);
+  const innerStart = polarPoint(cx, cy, innerRadius, startAngle);
+  const innerEnd = polarPoint(cx, cy, innerRadius, endAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${outerStart.x} ${outerStart.y} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y} L ${innerEnd.x} ${innerEnd.y} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y} Z`;
+}
+
+function ScatterChartPreview() {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const xMin = 350;
+  const xMax = 740;
+  const yMin = 240;
+  const yMax = 480;
+  const plot = { left: 62, right: 902, top: 28, bottom: 268 };
+  const xFor = (value: number) => plot.left + ((value - xMin) / (xMax - xMin)) * (plot.right - plot.left);
+  const yFor = (value: number) => plot.bottom - ((value - yMin) / (yMax - yMin)) * (plot.bottom - plot.top);
+  const activePoint = hovered === null ? null : scatterData[hovered];
+
+  return (
+    <div className="relative">
+      <svg className="block h-80 w-full" role="img" aria-label="Scatter chart preview" viewBox="0 0 920 320">
+        {[240, 300, 360, 420, 480].map((tick) => {
+          const y = yFor(tick);
+          return (
+            <g key={tick}>
+              <line stroke="var(--border)" strokeDasharray="4 4" x1={plot.left} x2={plot.right} y1={y} y2={y} />
+              <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="end" x={plot.left - 12} y={y + 4}>{tick}</text>
+            </g>
+          );
+        })}
+        {[350, 450, 550, 650, 750].map((tick) => {
+          const x = xFor(tick);
+          return (
+            <g key={tick}>
+              <line stroke="var(--border)" strokeDasharray="4 4" x1={x} x2={x} y1={plot.top} y2={plot.bottom} />
+              <text fill="var(--foreground-subtle)" fontSize="12" textAnchor="middle" x={x} y={plot.bottom + 20}>{tick}</text>
+            </g>
+          );
+        })}
+        <line stroke="var(--border)" x1={plot.left} x2={plot.right} y1={plot.bottom} y2={plot.bottom} />
+        <line stroke="var(--border)" x1={plot.left} x2={plot.left} y1={plot.top} y2={plot.bottom} />
+        <text fill="var(--foreground-subtle)" fontSize="13" fontWeight="600" textAnchor="middle" x="482" y="314">Mobile events</text>
+        <text fill="var(--foreground-subtle)" fontSize="13" fontWeight="600" textAnchor="middle" transform="rotate(-90 16 148)" x="16" y="148">Desktop events</text>
+        {scatterData.map((item, index) => (
+          <circle
+            aria-label={`${item.name}: mobile ${item.x}, desktop ${item.y}`}
+            className="cursor-pointer outline-none transition-opacity hover:opacity-100 focus:opacity-100"
+            cx={xFor(item.x)}
+            cy={yFor(item.y)}
+            fill="var(--chart-1)"
+            key={item.name}
+            onBlur={() => setHovered(null)}
+            onFocus={() => setHovered(index)}
+            onMouseEnter={() => setHovered(index)}
+            onMouseLeave={() => setHovered(null)}
+            opacity={hovered === null || hovered === index ? 0.82 : 0.36}
+            r={item.z + 4}
+            tabIndex={0}
+          />
+        ))}
+      </svg>
+      {activePoint && (
+        <div className="pointer-events-none absolute rounded-lg border border-border bg-elevated px-4 py-3 text-sm shadow-raised" style={{ left: `${(xFor(activePoint.x) / 920) * 100}%`, top: `${Math.max(8, yFor(activePoint.y) - 72)}px`, transform: "translateX(-50%)" }}>
+          <p className="mb-2 font-medium">{activePoint.name}</p>
+          <div className="grid gap-1.5">
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-1)]" /><span>Mobile</span><span className="ml-4 font-medium">{activePoint.x}</span></div>
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-2)]" /><span>Desktop</span><span className="ml-4 font-medium">{activePoint.y}</span></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GaugeChartPreview() {
+  return (
+    <div className="grid min-h-48 place-items-center">
+      <svg height="110" role="img" aria-label="Gauge chart preview" viewBox="0 0 180 110" width="180">
+        <path d="M 28 82 A 62 62 0 0 1 152 82" fill="none" stroke="var(--surface-active)" strokeLinecap="round" strokeWidth="12" />
+        <path d="M 28 82 A 62 62 0 0 1 133 39" fill="none" stroke="var(--chart-1)" strokeLinecap="round" strokeWidth="12" />
+        <text fill="var(--foreground)" fontSize="24" fontWeight="700" textAnchor="middle" x="90" y="78">76%</text>
+        <text fill="var(--foreground-subtle)" fontSize="11" textAnchor="middle" x="90" y="98">source health</text>
+      </svg>
+    </div>
+  );
+}
+
+function RadarChartPreview() {
+  const cx = 460;
+  const cy = 160;
+  const angles = radarData.map((_, index) => -90 + index * 60);
+  const point = (value: number, angle: number) => `${cx + Math.cos(angle * Math.PI / 180) * value * 1.25},${cy + Math.sin(angle * Math.PI / 180) * value * 1.25}`;
+  return <svg className="block h-80 w-full" role="img" aria-label="Radar chart preview" viewBox="0 0 920 320">{[35, 70, 105].map((r) => <polygon fill="none" key={r} points={angles.map((angle) => point(r / 1.25, angle)).join(" ")} stroke="var(--border)" />)}<polygon fill="var(--chart-1)" fillOpacity="0.22" points={radarData.map((item, index) => point(item.current, angles[index])).join(" ")} stroke="var(--chart-1)" strokeWidth="2" />{radarData.map((item, index) => <text fill="var(--foreground-subtle)" fontSize="12" key={item.name} textAnchor="middle" x={cx + Math.cos(angles[index] * Math.PI / 180) * 145} y={cy + Math.sin(angles[index] * Math.PI / 180) * 145}>{item.name}</text>)}</svg>;
+}
+
+function HeatmapChartPreview() {
+  const values = [
+    [12, 22, 31, 38, 45, 26, 16],
+    [18, 29, 41, 50, 36, 24, 20],
+    [9, 17, 28, 43, 56, 47, 32],
+    [14, 23, 34, 40, 31, 19, 12],
+  ];
+  const heatmapColour = (value: number) => {
+    if (value >= 46) return "var(--chart-1)";
+    if (value >= 36) return "var(--chart-2)";
+    if (value >= 26) return "var(--chart-3)";
+    if (value >= 16) return "var(--chart-4)";
+    return "var(--chart-5)";
+  };
+
+  return (
+    <div className="grid h-80 place-items-center">
+      <svg className="h-72 w-full max-w-3xl rounded-xl border border-border bg-surface shadow-soft" role="img" aria-label="Heatmap chart preview" viewBox="0 0 760 288">
+        {heatmapColumns.map((column, index) => (
+          <text fill="var(--foreground-subtle)" fontSize="12" fontWeight="600" key={column} textAnchor="middle" x={132 + index * 70} y="34">{column}</text>
+        ))}
+        {heatmapRows.map((row, rowIndex) => (
+          <g key={row}>
+            <text fill="var(--foreground-subtle)" fontSize="13" textAnchor="end" x="92" y={71 + rowIndex * 48}>{row}</text>
+            {heatmapColumns.map((column, columnIndex) => {
+              const value = values[rowIndex][columnIndex];
+              const x = 108 + columnIndex * 70;
+              const y = 48 + rowIndex * 48;
+              return (
+                <g key={`${row}-${column}`}>
+                  <rect fill={heatmapColour(value)} height="38" rx="7" stroke="var(--border)" width="58" x={x} y={y} />
+                  <text fill="var(--foreground)" fontSize="12" fontWeight="700" textAnchor="middle" x={x + 29} y={y + 24}>{value}</text>
+                </g>
+              );
+            })}
+          </g>
+        ))}
+        <g transform="translate(622 68)">
+          <text fill="var(--foreground-subtle)" fontSize="12" fontWeight="600" x="0" y="-18">Intensity</text>
+          <text fill="var(--foreground-subtle)" fontSize="12" x="28" y="10">High</text>
+          <rect fill="var(--chart-1)" height="22" rx="5" width="22" x="0" y="-4" />
+          <rect fill="var(--chart-2)" height="22" rx="5" width="22" x="0" y="28" />
+          <rect fill="var(--chart-3)" height="22" rx="5" width="22" x="0" y="60" />
+          <rect fill="var(--chart-4)" height="22" rx="5" width="22" x="0" y="92" />
+          <rect fill="var(--chart-5)" height="22" rx="5" width="22" x="0" y="124" />
+          <text fill="var(--foreground-subtle)" fontSize="12" x="28" y="142">Low</text>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function FunnelChartPreview() {
+  const widths = [620, 500, 380, 260, 160];
+  const top = 36;
+  const stageHeight = 48;
+  const center = 410;
+  return (
+    <div className="grid h-80 place-items-center">
+      <svg className="h-72 w-full max-w-3xl" role="img" aria-label="Funnel chart preview" viewBox="0 0 820 288">
+        <line stroke="var(--border)" x1="100" x2="720" y1={top + stageHeight * funnelData.length + 16} y2={top + stageHeight * funnelData.length + 16} />
+        <line stroke="var(--border)" x1="86" x2="86" y1={top} y2={top + stageHeight * funnelData.length} />
+        <text fill="var(--foreground-subtle)" fontSize="13" fontWeight="600" textAnchor="middle" x="410" y="276">Stage progression</text>
+        <text fill="var(--foreground-subtle)" fontSize="13" fontWeight="600" textAnchor="middle" transform="rotate(-90 22 140)" x="22" y="140">Volume</text>
+        {funnelData.map((item, index) => {
+          const currentWidth = widths[index];
+          const nextWidth = widths[index + 1];
+          const y1 = top + index * stageHeight;
+          const y2 = y1 + stageHeight;
+          const x1 = center - currentWidth / 2;
+          const x2 = center + currentWidth / 2;
+          const x3 = center + nextWidth / 2;
+          const x4 = center - nextWidth / 2;
+          return (
+            <g key={item.name}>
+              <path d={`M ${x1} ${y1} H ${x2} L ${x3} ${y2} H ${x4} Z`} fill={item.fill} opacity={1 - index * 0.08} />
+              <text fill="var(--foreground)" fontSize="14" fontWeight="650" textAnchor="middle" x={center} y={y1 + 30}>{item.name} · {item.value}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function SankeyChartPreview() {
+  const nodes: Array<[number, number, number, string, string]> = [
+    [80, 88, 116, "Sources", "var(--chart-1)"],
+    [385, 72, 92, "Objects", "var(--chart-2)"],
+    [385, 190, 54, "Jobs", "var(--chart-3)"],
+    [695, 58, 70, "Queries", "var(--chart-1)"],
+    [695, 160, 58, "Dashboards", "var(--chart-4)"],
+    [695, 240, 42, "Exports", "var(--chart-5)"],
+  ];
+
+  return (
+    <svg className="block h-80 w-full" role="img" aria-label="Sankey chart preview" viewBox="0 0 920 320">
+      <path d="M 104 112 C 225 112 250 94 385 94" fill="none" stroke="var(--chart-1)" strokeLinecap="round" strokeOpacity="0.26" strokeWidth="58" />
+      <path d="M 104 170 C 230 170 255 218 385 218" fill="none" stroke="var(--chart-3)" strokeLinecap="round" strokeOpacity="0.24" strokeWidth="34" />
+      <path d="M 409 98 C 540 98 565 88 695 88" fill="none" stroke="var(--chart-1)" strokeLinecap="round" strokeOpacity="0.24" strokeWidth="42" />
+      <path d="M 409 126 C 540 126 565 188 695 188" fill="none" stroke="var(--chart-4)" strokeLinecap="round" strokeOpacity="0.22" strokeWidth="34" />
+      <path d="M 409 218 C 540 218 565 260 695 260" fill="none" stroke="var(--chart-5)" strokeLinecap="round" strokeOpacity="0.22" strokeWidth="26" />
+      {nodes.map(([x, y, h, label, fill]) => (
+        <g key={label}>
+          <rect fill={fill} height={h} rx="6" width="18" x={x} y={y} />
+          <text fill="var(--foreground)" fontSize="13" fontWeight="650" x={x + 28} y={y + h / 2 + 4}>{label}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 function ChartExample({ type }: { type: ChartType }) {
-  return <div className="rounded-2xl border border-border bg-elevated p-6 shadow-soft"><ChartFrame type={type} /></div>;
+  return <div className="w-full rounded-2xl border border-border bg-elevated p-6 shadow-soft"><ChartFrame type={type} /></div>;
+}
+
+function isMetricChartType(type: ChartType): type is Extract<ChartType, "metric-basic" | "metric-change" | "metric-spark" | "metric-area" | "metric-bar"> {
+  return type === "metric-basic" || type === "metric-change" || type === "metric-spark" || type === "metric-area" || type === "metric-bar";
+}
+
+function barChartExampleCode() {
+  return `import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
+const data = [
+  { name: "Jan", value: 420 },
+  { name: "Feb", value: 560 },
+  { name: "Mar", value: 380 },
+  { name: "Apr", value: 640 },
+  { name: "May", value: 410 },
+  { name: "Jun", value: 670 },
+  { name: "Jul", value: 520 },
+  { name: "Aug", value: 720 },
+];
+
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="rounded-lg border border-border bg-elevated px-4 py-3 text-sm shadow-raised">
+      <p className="mb-2 font-medium">{label}</p>
+      <div className="flex items-center gap-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-1)]" />
+        <span>Value</span>
+        <span className="ml-4 font-medium">{payload[0].value}</span>
+      </div>
+    </div>
+  );
+}
+
+export function BarChartExample() {
+  return (
+    <div className="rounded-2xl border border-border bg-elevated p-6 shadow-soft">
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" />
+            <XAxis
+              dataKey="name"
+              axisLine={{ stroke: "var(--border)" }}
+              tick={{ fill: "var(--foreground-subtle)", fontSize: 12 }}
+              tickLine={false}
+            />
+            <YAxis
+              axisLine={{ stroke: "var(--border)" }}
+              tick={{ fill: "var(--foreground-subtle)", fontSize: 12 }}
+              tickLine={false}
+            />
+            <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--surface-hover)" }} />
+            <Bar dataKey="value" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}`;
 }
 
 function chartExampleCode(type: ChartType) {
+  if (type === "bar") return barChartExampleCode();
+  if (type.startsWith("metric-")) {
+    const chartType = type.replace("metric-", "");
+    return `<MetricCard
+  title="Revenue"
+  value="$23,522"
+  change={${chartType === "basic" ? "undefined" : '"12.4%"'}}
+  direction="up"
+  visual="${chartType}"
+/>`;
+  }
+
   const chartName = labelFromSlug(type);
   return `import { ResponsiveContainer } from "recharts";
 
@@ -810,6 +1424,11 @@ export function ${chartName.replace(/\s+/g, "")}Example() {
 function componentVariants(slug: string): ComponentVariantExample[] {
   if (slug === "charts") {
     return ([
+      ["metric-basic", "Metric Basic"],
+      ["metric-change", "Metric Change"],
+      ["metric-spark", "Metric Spark"],
+      ["metric-area", "Metric Area"],
+      ["metric-bar", "Metric Bar"],
       ["bar", "Bar Chart"],
       ["multi-bar", "Multi Bar Chart"],
       ["stacked-bar", "Stacked Bar Chart"],
@@ -824,8 +1443,7 @@ function componentVariants(slug: string): ComponentVariantExample[] {
       ["heatmap", "Heatmap"],
       ["funnel", "Funnel"],
       ["sankey", "Sankey"],
-      ["map", "Map"],
-    ] as Array<[ChartType, string]>).map(([type, label]) => ({ id: type, label, code: chartExampleCode(type), preview: <ChartExample type={type} /> }));
+    ] as Array<[ChartType, string]>).map(([type, label]) => ({ id: type, label, code: chartExampleCode(type), preview: isMetricChartType(type) ? <MetricCardPreview type={type} /> : <ChartExample type={type} /> }));
   }
 
   const variants: Record<string, ComponentVariantExample[]> = {
@@ -1251,7 +1869,7 @@ function ComponentPropertiesTable({ slug }: { slug: string }) {
     links: [["href", "string", "required", "Required", "Destination URL or route."], ["children", "ReactNode", "required", "Required", "Visible link text."], ["target", "string", "undefined", "Optional", "Use only when opening external destinations."]],
     cards: [["title", "string", '"Orders"', "Optional", "Card heading."], ["children", "ReactNode", "metric fallback", "Optional", "Card body content."], ["elevation", "token", "--shadow-soft", "Optional", "Needs source verification before exposing as a prop."]],
     "empty-states": [["title", "string", "required", "Required", "Explains the empty condition."], ["description", "string", "required", "Required", "Guides the next step."], ["action", "ReactNode", "undefined", "Optional", "Primary recovery action."]],
-    charts: [["type", "ChartType", "required", "Required", "Supports bar, multi-bar, stacked-bar, line, sparkline, area, pie, donut, scatter, gauge, radar, heatmap, funnel, sankey, and map."], ["data", "array", "demo data", "Required", "Values rendered by the chart."], ["tokens", "--chart-*", "theme tokens", "Optional", "Maps series colour to semantic chart tokens."]],
+    charts: [["type", "ChartType", "required", "Required", "Supports metric cards, bar, multi-bar, stacked-bar, line, sparkline, area, pie, donut, scatter, gauge, radar, heatmap, funnel, and sankey."], ["data", "array", "demo data", "Required", "Values rendered by the chart."], ["tokens", "--chart-*", "theme tokens", "Optional", "Maps series colour to semantic chart tokens."]],
     tables: [["columns", "array", "required", "Required", "Column definitions."], ["rows", "array", "required", "Required", "Records shown in the table."], ["searchable", "boolean", "true in preview", "Optional", "Adds filtering when supported. Needs source verification."]],
     navigation: [["items", "array", "required", "Required", "Navigation destinations."], ["activeItem", "string", "current route", "Optional", "Highlights the active destination."], ["collapsible", "boolean", "true in sidebar", "Optional", "Supports expandable groups."]],
     modals: [["open", "boolean", "required", "Required", "Controls dialog visibility."], ["title", "string", "required", "Required", "Dialog accessible heading."], ["onClose", "function", "required", "Required", "Dismiss handler."], ["actions", "ReactNode", "undefined", "Optional", "Footer actions."]],

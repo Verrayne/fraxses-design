@@ -2,7 +2,6 @@ import Box from "lucide-react/dist/esm/icons/box.js";
 import Component from "lucide-react/dist/esm/icons/component.js";
 import Layers from "lucide-react/dist/esm/icons/layers.js";
 import Palette from "lucide-react/dist/esm/icons/palette.js";
-import Shapes from "lucide-react/dist/esm/icons/shapes.js";
 
 export const foundationItems = [
   "colours",
@@ -57,7 +56,6 @@ export const docsNav = [
   { title: "Foundations", icon: Palette, items: foundationItems.map((slug) => ({ title: labelFromSlug(slug), href: `/docs/foundations/${slug}` })) },
   { title: "Components", icon: Component, items: [{ title: "Overview", href: "/docs/components/overview" }, ...componentItems.map((slug) => ({ title: labelFromSlug(slug), href: `/docs/components/${slug}` }))] },
   { title: "Patterns", icon: Layers, items: patternItems.map((slug) => ({ title: labelFromSlug(slug), href: `/docs/patterns/${slug}` })) },
-  { title: "Themes", icon: Shapes, items: ["forest", "oryx", "midnight", "ocean"].map((slug) => ({ title: labelFromSlug(slug), href: `/themes/${slug}` })) },
 ];
 
 export function labelFromSlug(slug: string) {

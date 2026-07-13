@@ -14,11 +14,10 @@ export function Sidebar() {
     <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] overflow-y-auto bg-elevated py-6 lg:block">
       <div className="mb-7 border-b border-border bg-elevated px-4 pb-6">
         <p className="text-xs font-semibold uppercase tracking-[0.08em] text-subtle">Active theme</p>
-        <p className="mt-1 text-lg font-semibold text-ink">{activeTheme.name}</p>
-        <p className="mt-1 text-sm leading-6 text-subtle">{activeTheme.description}</p>
-        <div className="mt-3">
-          <ThemeSwitcher />
+        <div className="mt-1">
+          <ThemeSwitcher size="lg" />
         </div>
+        <p className="mt-1 text-sm leading-6 text-subtle">{activeTheme.description}</p>
       </div>
       <nav className="space-y-4 px-2" aria-label="Design guide">
         {docsNav.map((section) => {
