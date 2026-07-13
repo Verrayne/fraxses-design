@@ -548,14 +548,6 @@ function ComponentPage({ slug }: { slug: string }) {
   return <SharedComponentPage slug={slug} />;
 }
 
-const componentPageNavItems = [
-  { id: "overview", label: "Overview" },
-  { id: "usage", label: "Usage" },
-  { id: "variants", label: "Variants and states" },
-  { id: "properties", label: "Properties" },
-  { id: "tokens", label: "Token references" },
-];
-
 const buttonPageNavItems = [
   { id: "overview", label: "Overview" },
   { id: "usage", label: "Usage" },
@@ -567,8 +559,227 @@ const buttonPageNavItems = [
   { id: "tokens", label: "Token references" },
 ];
 
+type ComponentVariantExample = {
+  id: string;
+  label: string;
+  description?: ReactNode;
+  code: string;
+  preview: ReactNode;
+};
+
+const componentDescriptions: Record<string, string> = {
+  badges: "Badges mark compact status, category, or metadata labels without interrupting the surrounding workflow.",
+  avatars: "Avatars represent people, teams, or entities in compact identity surfaces.",
+  alerts: "Alerts communicate immediate system feedback such as success, warning, or error outcomes.",
+  callouts: "Callouts draw attention to contextual messages and optional actions inside a page.",
+  "form-controls": "Form controls let users make binary, single-choice, and ranged selections.",
+  inputs: "Inputs collect short text values with helper and validation feedback.",
+  selects: "Selects let users choose one option from a constrained list.",
+  textarea: "Textarea fields collect longer free-form text while preserving the form rhythm.",
+  tabs: "Tabs switch between related views within the same context.",
+  progress: "Progress indicators show completion or capacity without requiring exact interaction.",
+  links: "Links navigate users to related content while remaining readable inside continuous text.",
+  cards: "Cards group related content, metrics, charts, or actions into scannable blocks.",
+  "empty-states": "Empty states explain why a surface has no content and guide the next useful action.",
+  charts: "Charts visualize trends, comparisons, and composition with theme-aware data colours.",
+  tables: "Tables organize structured records for scanning, comparison, and repeated action.",
+  navigation: "Navigation helps users move through product sections while preserving orientation.",
+  modals: "Modals interrupt the current flow for focused confirmation, creation, or destructive decisions.",
+  toasts: "Toasts provide brief, non-blocking feedback after a user or system action.",
+  popovers: "Popovers expose lightweight contextual controls without leaving the current page.",
+  dropdowns: "Dropdowns present compact action or option menus from a trigger.",
+};
+
+function componentOverviewCopy(slug: string) {
+  const title = labelFromSlug(slug).toLowerCase();
+  const description = componentDescriptions[slug] ?? `${labelFromSlug(slug)} support shared Fraxses product workflows.`;
+  return `${description} Use ${title} when the information belongs inline with the current task; choose a fuller page pattern when users need comparison, editing space, or persistent context.`;
+}
+
+function componentUsageItems(slug: string) {
+  const shared = ["Use shared components so Forest, Oryx, Midnight, and Ocean inherit the same anatomy.", "Use semantic tones for meaning rather than palette-specific colour names.", "Keep labels short, direct, and useful in compact enterprise layouts."];
+  const bySlug: Record<string, string[]> = {
+    alerts: ["Use alerts near the area affected by the message.", "Reserve error and warning tones for conditions that need attention.", "Do not rely on colour alone; pair status with text and icons."],
+    inputs: ["Place helper text directly below the field.", "Use success and error feedback only after user input or validation.", "Keep placeholder text supplemental, not the only label."],
+    modals: ["Use modals for focused decisions that should block the current task.", "Keep actions explicit and provide a safe dismissal path.", "Return focus to the triggering control after close. Needs source verification in the implementation."],
+    toasts: ["Use toasts for temporary feedback that does not require a decision.", "Do not use toasts for critical errors that must remain visible.", "Keep messages concise and avoid stacking excessive notifications."],
+    popovers: ["Use popovers for contextual controls that are useful but not primary.", "Close popovers on escape and outside click. Needs source verification in the implementation.", "Do not hide required form steps inside a transient popover."],
+    dropdowns: ["Use dropdowns for compact action sets.", "Keep options scannable and avoid deeply nested menus.", "Support keyboard navigation. Needs source verification in the implementation."],
+  };
+  return bySlug[slug] ?? shared;
+}
+
+function componentDoDont(slug: string) {
+  const title = labelFromSlug(slug).toLowerCase();
+  return {
+    doItems: [`Use ${title} for its documented purpose.`, "Keep live examples theme-aware through semantic tokens."],
+    dontItems: ["Do not hard-code Forest or Oryx hex values in shared component JSX.", "Do not duplicate the documentation by theme."],
+  };
+}
+
+function componentTokenItems(slug: string) {
+  if (slug === "charts") return ["--chart-1 through --chart-5", "--surface-raised", "--border", "--foreground"];
+  if (["alerts", "badges", "callouts", "inputs", "form-controls", "progress"].includes(slug)) return ["--primary, --secondary, --neutral, --success, --warning, --error", "--*-subtle, --*-border, --*-foreground", "--focus-ring"];
+  if (["cards", "modals", "popovers", "dropdowns", "tables", "navigation"].includes(slug)) return ["--surface", "--surface-raised", "--surface-hover", "--border", "--shadow-soft"];
+  return ["--foreground", "--foreground-subtle", "--border", "--focus-ring"];
+}
+
+function componentVariants(slug: string): ComponentVariantExample[] {
+  const variants: Record<string, ComponentVariantExample[]> = {
+    badges: [
+      { id: "solid-badges", label: "Solid Badges", code: `<Badge tone="primary">Primary</Badge>
+<Badge tone="secondary">Secondary</Badge>
+<Badge tone="neutral">Neutral</Badge>
+<Badge tone="success">Success</Badge>
+<Badge tone="warning">Warning</Badge>
+<Badge tone="error">Error</Badge>`, preview: <ComponentPreview slug="badges" /> },
+      { id: "soft-and-outline-badges", label: "Soft And Outline Badges", code: `<Badge tone="success" variant="soft">Success</Badge>
+<Badge tone="warning" variant="soft">Warning</Badge>
+<Badge tone="error" variant="soft">Error</Badge>
+<Badge tone="success" variant="outline">Success</Badge>
+<Badge tone="warning" variant="outline">Warning</Badge>
+<Badge tone="error" variant="outline">Error</Badge>`, preview: <ComponentMatrix slug="badges" /> },
+    ],
+    avatars: [
+      { id: "avatar-content", label: "Avatar Content", code: `<Avatar>E</Avatar>
+<Avatar>EV</Avatar>
+<Avatar>icon</Avatar>
+<Avatar image="/avatar.jpg" />`, preview: <div className="flex flex-wrap gap-4"><Avatar>E</Avatar><Avatar>EV</Avatar><Avatar>icon</Avatar><Avatar tone="secondary">A</Avatar></div> },
+      { id: "avatar-variants", label: "Avatar Variants", code: `<Avatar variant="solid">E</Avatar>
+<Avatar variant="soft">E</Avatar>
+<Avatar variant="solid-gradient">E</Avatar>
+<Avatar variant="soft-gradient">E</Avatar>`, preview: <div className="flex flex-wrap gap-4"><Avatar variant="solid">E</Avatar><Avatar variant="soft">E</Avatar><Avatar variant="solid-gradient">E</Avatar><Avatar variant="soft-gradient">E</Avatar><Avatar tone="secondary" variant="solid">E</Avatar><Avatar tone="secondary" variant="soft">E</Avatar></div> },
+    ],
+    alerts: [
+      { id: "solid-alerts", label: "Solid Alerts", code: `<Alert tone="primary" variant="solid" title="Update available" />
+<Alert tone="success" variant="solid" title="Products imported" />
+<Alert tone="warning" variant="solid" title="Connection unstable" />
+<Alert tone="error" variant="solid" title="Failed to login" />`, preview: <div className="grid gap-3"><Alert tone="primary" variant="solid" title="Update available" /><Alert tone="success" variant="solid" title="Products imported" /><Alert tone="warning" variant="solid" title="Connection unstable" /><Alert tone="error" variant="solid" title="Failed to login" /></div> },
+      { id: "soft-alerts", label: "Soft Alerts", code: `<Alert tone="primary" variant="soft" title="Update available" />
+<Alert tone="success" variant="soft" title="Products imported" />
+<Alert tone="warning" variant="soft" title="Connection unstable" />
+<Alert tone="error" variant="soft" title="Failed to login" />`, preview: <div className="grid gap-3"><Alert tone="primary" variant="soft" title="Update available" /><Alert tone="success" variant="soft" title="Products imported" /><Alert tone="warning" variant="soft" title="Connection unstable" /><Alert tone="error" variant="soft" title="Failed to login" /></div> },
+    ],
+    callouts: [
+      { id: "callout-tones", label: "Callout Tones", code: `<Callout tone="primary" variant="solid" />
+<Callout tone="secondary" variant="solid" />
+<Callout tone="neutral" variant="solid" />`, preview: <div className="grid gap-3"><Callout tone="primary" variant="solid" /><Callout tone="secondary" variant="solid" /><Callout tone="neutral" variant="solid" /></div> },
+      { id: "callout-variants", label: "Callout Variants", code: `<Callout tone="primary" variant="soft" />
+<Callout tone="primary" variant="surface" />
+<Callout tone="primary" variant="outline" />`, preview: <div className="grid gap-3"><Callout tone="primary" variant="soft" /><Callout tone="primary" variant="surface" /><Callout tone="primary" variant="outline" /></div> },
+    ],
+    "form-controls": [
+      { id: "selection-controls", label: "Selection Controls", code: `<Checkbox label="Checkbox" />
+<Radio label="Radio" />
+<Switch />`, preview: <div className="flex flex-wrap items-center gap-8"><Checkbox /><Radio /><Switch /></div> },
+      { id: "range-controls", label: "Range Controls", code: `<Progress value={50} />
+<Progress tone="secondary" soft value={50} />`, preview: <div className="grid gap-4"><Progress value={50} /><Progress tone="secondary" soft value={50} /></div> },
+    ],
+    inputs: [
+      { id: "input-tones", label: "Input Tones", code: `<TextInput tone="primary" label="Serial number" />
+<TextInput tone="secondary" label="Serial number" />
+<TextInput tone="success" label="Username" helper="Username is available!" />
+<TextInput tone="error" label="Email address" helper="Email address is invalid" />`, preview: <ComponentPreview slug="inputs" /> },
+    ],
+    selects: [
+      { id: "default-select", label: "Default Select", code: `<Select label="Source type">
+  <option>Postgres</option>
+  <option>REST API</option>
+  <option>CSV upload</option>
+</Select>`, preview: <div className="max-w-md"><Select label="Source type"><option>Postgres</option><option>REST API</option><option>CSV upload</option></Select></div> },
+    ],
+    textarea: [
+      { id: "default-textarea", label: "Default Textarea", code: `<Textarea label="Description" placeholder="Describe the data source..." />`, preview: <div className="max-w-lg"><Textarea label="Description" placeholder="Describe the data source..." /></div> },
+    ],
+    tabs: [
+      { id: "primary-tabs", label: "Primary Tabs", code: `<Tabs items={["My account", "Orders", "Settings", "Notifications"]} />`, preview: <Tabs /> },
+      { id: "secondary-tabs", label: "Secondary Tabs", code: `<Tabs tone="secondary" items={["My account", "Orders", "Settings", "Notifications"]} />`, preview: <Tabs tone="secondary" /> },
+    ],
+    progress: [
+      { id: "solid-progress", label: "Solid Progress", code: `<Progress value={65} />
+<Progress tone="secondary" value={65} />`, preview: <div className="grid gap-4"><Progress value={65} /><Progress tone="secondary" value={65} /></div> },
+      { id: "soft-progress", label: "Soft Progress", code: `<Progress soft value={65} />
+<Progress tone="secondary" soft value={65} />`, preview: <div className="grid gap-4"><Progress soft value={65} /><Progress tone="secondary" soft value={65} /></div> },
+    ],
+    links: [
+      { id: "inline-links", label: "Inline Links", code: `<p>
+  Inline links use <a href="/docs/components/links">theme-aware colour</a>
+  and stay readable inside continuous text.
+</p>`, preview: <ComponentPreview slug="links" /> },
+    ],
+    cards: [
+      { id: "metric-cards", label: "Metric Cards", code: `<Card title="Orders">
+  <p className="mt-2 text-2xl font-semibold">420</p>
+</Card>`, preview: <div className="grid gap-4 md:grid-cols-3"><Card title="Orders" /><Card title="Revenue"><p className="mt-2 text-2xl font-semibold">$23,522.92</p></Card><Card title="New customers"><p className="mt-2 text-2xl font-semibold">12</p></Card></div> },
+      { id: "chart-cards", label: "Chart Cards", code: `<Card title="Orders">
+  <BarChart />
+</Card>
+<Card title="Visitors">
+  <LineChart />
+</Card>`, preview: <div className="grid gap-4 md:grid-cols-2"><Card title="Orders"><BarChart /></Card><Card title="Visitors"><LineChart /></Card></div> },
+    ],
+    "empty-states": [
+      { id: "empty-state", label: "Empty State", code: `<Card title="No Team Members">
+  <p>Invite your team to collaborate on this project.</p>
+  <Button>Invite Members</Button>
+</Card>`, preview: <div className="mx-auto max-w-md rounded-2xl border border-dashed border-border bg-elevated p-8 text-center"><div className="mx-auto mb-4 flex justify-center"><Avatar>EV</Avatar><Avatar tone="secondary">A</Avatar></div><h3 className="text-lg font-semibold">No Team Members</h3><p className="mt-2 text-sm text-subtle">Invite your team to collaborate on this project.</p><Button className="mt-5" prefixIcon={<Plus size={16} />} suffixIcon={false}>Invite Members</Button></div> },
+    ],
+    charts: [
+      { id: "bar-and-line-charts", label: "Bar And Line Charts", code: `<Card title="Multi Bar Chart"><BarChart /></Card>
+<Card title="Line Chart"><LineChart /></Card>`, preview: <div className="grid gap-4 md:grid-cols-2"><Card title="Multi Bar Chart"><BarChart /></Card><Card title="Line Chart"><LineChart /></Card></div> },
+      { id: "donut-and-stacked-charts", label: "Donut And Stacked Charts", code: `<Card title="Donut Chart"><DonutChart /></Card>
+<Card title="Stacked Bar Chart"><BarChart stacked /></Card>`, preview: <div className="grid gap-4 md:grid-cols-2"><Card title="Donut Chart"><DonutChart /></Card><Card title="Stacked Bar Chart"><BarChart stacked /></Card></div> },
+    ],
+    tables: [
+      { id: "data-table", label: "Data Table", code: `<SearchInput />
+<DataTable />`, preview: <div><SearchInput /><DataTable /></div> },
+    ],
+    navigation: [
+      { id: "side-navigation", label: "Side Navigation", code: `<DashboardPreview compact />`, preview: <DashboardPreview compact /> },
+    ],
+    modals: [
+      { id: "confirmation-modal", label: "Confirmation Modal", code: `<div role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <h2 id="modal-title">Connect source?</h2>
+  <p>Confirm the source details before publishing.</p>
+  <Button>Connect</Button>
+  <Button variant="outline">Cancel</Button>
+</div>`, preview: <div className="mx-auto max-w-md rounded-2xl border border-border bg-elevated p-6 shadow-raised" role="dialog" aria-modal="true" aria-labelledby="modal-title-preview"><h3 id="modal-title-preview" className="text-lg font-semibold">Connect source?</h3><p className="mt-2 text-sm text-subtle">Confirm the source details before publishing.</p><div className="mt-6 flex justify-end gap-3"><Button variant="outline">Cancel</Button><Button>Connect</Button></div></div> },
+    ],
+    toasts: [
+      { id: "toast-feedback", label: "Toast Feedback", code: `<Alert tone="success" variant="soft" title="Source synced" body="Daily sync completed successfully." dismiss />`, preview: <div className="max-w-lg"><Alert tone="success" variant="soft" title="Source synced" body="Daily sync completed successfully." dismiss /></div> },
+    ],
+    popovers: [
+      { id: "popover-trigger", label: "Popover Trigger", code: `<details>
+  <summary>Open actions</summary>
+  <div role="dialog">View profile, settings, remove</div>
+</details>`, preview: <details className="mx-auto w-64 rounded-lg border border-border bg-elevated p-3"><summary className="cursor-pointer font-medium">Open actions</summary><div className="mt-3 grid gap-2 text-sm text-subtle"><button className="text-left">View profile</button><button className="text-left">Settings</button><button className="text-left">Remove access</button></div></details> },
+    ],
+    dropdowns: [
+      { id: "dropdown-menu", label: "Dropdown Menu", code: `<details>
+  <summary>More actions</summary>
+  <menu>
+    <button>Archive</button>
+    <button>Report</button>
+    <button>Snooze</button>
+  </menu>
+</details>`, preview: <details className="mx-auto w-56 rounded-lg border border-border bg-elevated p-3"><summary className="cursor-pointer font-medium">More actions</summary><div className="mt-3 grid gap-1 text-sm"><button className="rounded px-2 py-1.5 text-left hover:bg-surface-hover">Archive</button><button className="rounded px-2 py-1.5 text-left hover:bg-surface-hover">Report</button><button className="rounded px-2 py-1.5 text-left hover:bg-surface-hover">Snooze</button></div></details> },
+    ],
+  };
+
+  return variants[slug] ?? [
+    { id: `${slug}-preview`, label: `${labelFromSlug(slug)} Preview`, code: componentExampleCode(slug), preview: <ComponentPreview slug={slug} /> },
+  ];
+}
+
 function SharedComponentPage({ slug }: { slug: string }) {
-  const navItems = slug === "buttons" ? buttonPageNavItems : componentPageNavItems;
+  const variantExamples = componentVariants(slug);
+  const navItems = slug === "buttons" ? buttonPageNavItems : [
+    { id: "overview", label: "Overview" },
+    { id: "usage", label: "Usage" },
+    ...variantExamples.map(({ id, label }) => ({ id, label })),
+    { id: "properties", label: "Properties" },
+    { id: "tokens", label: "Token references" },
+  ];
   const [activeSection, setActiveSection] = useState(navItems[0].id);
 
   useEffect(() => {
@@ -600,41 +811,44 @@ function SharedComponentPage({ slug }: { slug: string }) {
         <div className="mb-9 max-w-3xl">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.12em] text-primary">Components</p>
           <h1>{title}</h1>
-          <p className="mt-4 text-lg leading-8 text-subtle">A shared Fraxses component page. Anatomy, variants, states and code remain stable while the active theme changes the semantic tokens.</p>
+          <p className="mt-4 text-lg leading-8 text-subtle">{componentDescriptions[slug] ?? `${title} support shared Fraxses product workflows.`}</p>
         </div>
 
         <section id="overview" className="fx-doc-section fx-doc-section-first">
-          <PreviewPanel title="Overview"><ComponentPreview slug={slug} /></PreviewPanel>
+          <PreviewPanel title="Overview">
+            <p className="mb-5 max-w-3xl text-sm leading-7 text-subtle">{componentOverviewCopy(slug)}</p>
+            <ComponentPreview slug={slug} />
+          </PreviewPanel>
         </section>
 
         <section id="usage" className="fx-doc-section">
           <div className="grid gap-4 md:grid-cols-2">
-            <Guidance title="Accessibility" items={["Use visible focus states.", "Pair colour with labels or icons.", "Keep disabled states readable and non-interactive."]} />
-            <Guidance title="Usage guidance" items={["Use the shared component instead of theme-specific copies.", "Use semantic tones for meaning.", "Keep enterprise layouts compact and scannable."]} />
+            <Guidance title="Accessibility" items={["Keep visible focus states intact.", "Pair colour with labels, icons, or position where status is important.", "Ensure interactive examples can be operated with a keyboard."]} />
+            <Guidance title="Usage guidance" items={componentUsageItems(slug)} />
           </div>
           <div className="mt-4">
-            <DoDont doItems={["Reference semantic tokens.", "Let the selected theme change colour treatment."]} dontItems={["Do not hard-code Forest or Oryx hex values in component JSX.", "Do not duplicate component docs by theme."]} />
+            <DoDont {...componentDoDont(slug)} />
           </div>
         </section>
 
         {slug === "buttons" ? <ButtonSections /> : (
-          <section id="variants" className="fx-doc-section">
-            <TooltipExampleCard code={componentExampleCode(slug)} title="Variants and states">
-              <ComponentMatrix slug={slug} />
-            </TooltipExampleCard>
-          </section>
+          variantExamples.map((variant) => (
+            <section id={variant.id} className="fx-doc-section" key={variant.id}>
+              <TooltipExampleCard code={variant.code} description={variant.description} title={variant.label}>
+                {variant.preview}
+              </TooltipExampleCard>
+            </section>
+          ))
         )}
 
         <section id="properties" className="fx-doc-section">
-          <PreviewPanel title="Properties table"><PropsTable /></PreviewPanel>
+          <PreviewPanel title="Properties"><ComponentPropertiesTable slug={slug} /></PreviewPanel>
         </section>
 
         <section id="tokens" className="fx-doc-section">
           <PreviewPanel title="Token references">
             <ul className="guide-list">
-              <li>--primary, --secondary, --neutral, --success, --warning, --error</li>
-              <li>--surface, --surface-raised, --border, --focus-ring</li>
-              <li>--chart-1 through --chart-5 for chart geometry.</li>
+              {componentTokenItems(slug).map((item) => <li key={item}>{item}</li>)}
             </ul>
           </PreviewPanel>
         </section>
@@ -811,6 +1025,49 @@ function ButtonMatrixRow({ tone, variant }: { tone: Tone; variant: Variant }) {
       <Button tone={tone} variant={variant} className="fx-button-demo-active">Continue</Button>
       <Button tone={tone} variant={variant} disabled>Continue</Button>
     </>
+  );
+}
+
+function ComponentPropertiesTable({ slug }: { slug: string }) {
+  const sharedRows = [
+    ["tone", '"primary" | "secondary" | "neutral" | status tones', "component default", "Optional", "Maps the component to semantic colour tokens in the active theme."],
+    ["variant", "string", "component default", "Optional", "Selects the visual treatment documented in the examples above."],
+    ["children", "ReactNode", "undefined", "Optional", "Provides visible content where the component accepts custom content."],
+  ];
+  const rowsBySlug: Record<string, string[][]> = {
+    badges: [["tone", "Tone", '"primary"', "Optional", "Sets the badge tone."], ["variant", '"solid" | "soft" | "outline"', '"solid"', "Optional", "Sets the badge visual treatment."], ["size", '"sm" | "md"', '"md"', "Optional", "Controls compact badge sizing."], ["dot", "boolean", "false", "Optional", "Adds a small leading status dot."]],
+    avatars: [["tone", '"primary" | "secondary" | "neutral"', '"primary"', "Optional", "Sets avatar colour treatment."], ["variant", '"solid" | "soft" | "solid-gradient" | "soft-gradient"', '"solid"', "Optional", "Controls fill and gradient treatment."], ["size", '"xs" | "sm" | "md" | "lg" | "xl"', '"md"', "Optional", "Controls avatar dimensions."], ["image", "string", "undefined", "Optional", "Displays an image avatar when provided."]],
+    alerts: [["tone", "Tone", '"primary"', "Optional", "Maps alert intent to semantic colour."], ["variant", '"solid" | "soft"', '"solid"', "Optional", "Controls alert emphasis."], ["title", "string", "required", "Required", "Primary alert message."], ["body", "string", "undefined", "Optional", "Supporting alert detail."], ["dismiss", "boolean", "false", "Optional", "Shows a dismiss control."]],
+    callouts: [["tone", '"primary" | "secondary" | "neutral"', '"primary"', "Optional", "Sets callout colour treatment."], ["variant", '"solid" | "soft" | "surface" | "outline"', '"solid"', "Optional", "Controls callout emphasis."], ["action", "ReactNode", "built in", "Optional", "Current shared preview uses a feedback action."]],
+    "form-controls": [["checked", "boolean", "true", "Optional", "Sets selected state for checkbox, radio, and switch previews."], ["tone", '"primary" | "secondary"', '"primary"', "Optional", "Maps control colour to semantic tokens."], ["label", "string", "component default", "Optional", "Accessible visible label."], ["value", "number", "50", "Optional", "Progress/range completion value."]],
+    inputs: [["tone", "Tone | \"default\"", '"primary"', "Optional", "Sets validation or emphasis colour."], ["label", "string", '"Serial number"', "Optional", "Visible input label."], ["helper", "string", "default helper", "Optional", "Helper or validation text below the input."], ["placeholder", "string", '"Serial number"', "Optional", "Supplemental placeholder copy."]],
+    selects: [["label", "string", '"Option"', "Optional", "Visible select label."], ["children", "option elements", "required", "Required", "Available choices."], ["value", "string", "undefined", "Optional", "Selected option value."], ["disabled", "boolean", "false", "Optional", "Prevents interaction."]],
+    textarea: [["label", "string", '"Notes"', "Optional", "Visible textarea label."], ["placeholder", "string", "undefined", "Optional", "Supplemental hint text."], ["disabled", "boolean", "false", "Optional", "Prevents editing."], ["required", "boolean", "false", "Optional", "Marks the field as required."]],
+    tabs: [["tone", '"primary" | "secondary"', '"primary"', "Optional", "Sets active indicator colour."], ["items", "string[]", "My account, Orders, Settings, Notifications", "Optional", "Tab labels in display order."], ["activeIndex", "number", "2 in preview", "Optional", "Needs source verification in the shared implementation."]],
+    progress: [["tone", '"primary" | "secondary"', '"primary"', "Optional", "Sets progress fill colour."], ["soft", "boolean", "false", "Optional", "Uses the softer border token as the fill."], ["value", "number", "50", "Optional", "Completion value from 0 to 100."]],
+    links: [["href", "string", "required", "Required", "Destination URL or route."], ["children", "ReactNode", "required", "Required", "Visible link text."], ["target", "string", "undefined", "Optional", "Use only when opening external destinations."]],
+    cards: [["title", "string", '"Orders"', "Optional", "Card heading."], ["children", "ReactNode", "metric fallback", "Optional", "Card body content."], ["elevation", "token", "--shadow-soft", "Optional", "Needs source verification before exposing as a prop."]],
+    "empty-states": [["title", "string", "required", "Required", "Explains the empty condition."], ["description", "string", "required", "Required", "Guides the next step."], ["action", "ReactNode", "undefined", "Optional", "Primary recovery action."]],
+    charts: [["type", "bar | line | donut | stacked", "required", "Required", "Selects chart geometry."], ["data", "array", "demo data", "Required", "Values rendered by the chart."], ["tokens", "--chart-*", "theme tokens", "Optional", "Maps series colour to semantic chart tokens."]],
+    tables: [["columns", "array", "required", "Required", "Column definitions."], ["rows", "array", "required", "Required", "Records shown in the table."], ["searchable", "boolean", "true in preview", "Optional", "Adds filtering when supported. Needs source verification."]],
+    navigation: [["items", "array", "required", "Required", "Navigation destinations."], ["activeItem", "string", "current route", "Optional", "Highlights the active destination."], ["collapsible", "boolean", "true in sidebar", "Optional", "Supports expandable groups."]],
+    modals: [["open", "boolean", "required", "Required", "Controls dialog visibility."], ["title", "string", "required", "Required", "Dialog accessible heading."], ["onClose", "function", "required", "Required", "Dismiss handler."], ["actions", "ReactNode", "undefined", "Optional", "Footer actions."]],
+    toasts: [["tone", "Tone", '"success"', "Optional", "Maps toast status to semantic colour."], ["title", "string", "required", "Required", "Toast message."], ["body", "string", "undefined", "Optional", "Supporting detail."], ["duration", "number", "Needs source verification", "Optional", "Auto-dismiss timing."]],
+    popovers: [["open", "boolean", "uncontrolled in preview", "Optional", "Controls popover visibility."], ["trigger", "ReactNode", "required", "Required", "Element that opens the popover."], ["children", "ReactNode", "required", "Required", "Popover content."], ["placement", "string", "Needs source verification", "Optional", "Preferred popover position."]],
+    dropdowns: [["trigger", "ReactNode", "required", "Required", "Element that opens the menu."], ["items", "array", "required", "Required", "Menu actions or options."], ["open", "boolean", "uncontrolled in preview", "Optional", "Controls visibility when supported."], ["onSelect", "function", "undefined", "Optional", "Handles item selection."]],
+  };
+  const rows = rowsBySlug[slug] ?? sharedRows;
+  return (
+    <div className="overflow-hidden rounded-lg border border-border">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-surface text-subtle">
+          <tr><th className="px-4 py-3 font-semibold">Property</th><th className="px-4 py-3 font-semibold">Type</th><th className="px-4 py-3 font-semibold">Default</th><th className="px-4 py-3 font-semibold">Status</th><th className="px-4 py-3 font-semibold">Description</th></tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map(([name, type, defaultValue, status, description]) => <tr key={name}><th className="px-4 py-3 font-mono text-xs">{name}</th><td className="px-4 py-3 font-mono text-xs text-subtle">{type}</td><td className="px-4 py-3 text-subtle">{defaultValue}</td><td className="px-4 py-3 text-subtle">{status}</td><td className="px-4 py-3 text-subtle">{description}</td></tr>)}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
