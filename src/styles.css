@@ -701,8 +701,8 @@ pre {
 
 .fx-badge-solid {
   border-color: transparent;
-  background: var(--tone);
-  color: var(--tone-foreground);
+  background: var(--badge-tone);
+  color: var(--badge-tone-foreground);
 }
 
 .fx-badge-soft {

@@ -25,6 +25,12 @@ const toneStyle = (tone: Tone) => ({
   "--tone-foreground": `var(--${tone}-foreground)`,
 } as CSSProperties);
 
+const badgeToneStyle = (tone: Tone) => ({
+  ...toneStyle(tone),
+  "--badge-tone": `var(--badge-${tone}, var(--${tone}))`,
+  "--badge-tone-foreground": `var(--badge-${tone}-foreground, var(--${tone}-foreground))`,
+} as CSSProperties);
+
 export function Button({ tone = "primary", variant = "solid", size = "md", loading, iconOnly, prefixIcon, suffixIcon, children, className = "", disabled, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: Tone; variant?: Variant; size?: "xs" | "sm" | "md" | "lg" | "xl"; loading?: boolean; iconOnly?: boolean; prefixIcon?: ReactNode; suffixIcon?: ReactNode | false }) {
   const sizes = {
     xs: "fx-button-size-xs",
@@ -51,7 +57,7 @@ export function Button({ tone = "primary", variant = "solid", size = "md", loadi
 
 export function Badge({ tone = "primary", variant = "solid", size = "md", dot, children }: { tone?: Tone; variant?: "solid" | "soft" | "surface" | "outline"; size?: "sm" | "md"; dot?: boolean; children: ReactNode }) {
   return (
-    <span className={`fx-badge fx-badge-${variant} inline-flex items-center gap-1.5 rounded-full border font-medium ${size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"}`} style={toneStyle(tone)}>
+    <span className={`fx-badge fx-badge-${variant} inline-flex items-center gap-1.5 rounded-full border font-medium ${size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"}`} style={badgeToneStyle(tone)}>
       {dot && <span className="h-1.5 w-1.5 rounded-full bg-current" />}
       {children}
     </span>
