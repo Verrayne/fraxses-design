@@ -710,7 +710,7 @@ function ComponentPreview({ slug }: { slug: string }) {
 
 function ComponentMatrix({ slug }: { slug: string }) {
   if (slug === "buttons") return <ButtonMatrix />;
-  if (slug === "badges") return <div className="grid gap-3">{(["solid", "soft", "surface", "outline"] as const).map((variant) => <div key={variant} className="flex flex-wrap gap-4"><span className="w-20 text-sm text-subtle">{variant}</span>{(["primary", "secondary", "neutral", "success", "warning", "error"] as const).map((tone) => <Badge key={tone} tone={tone} variant={variant}>{tone}</Badge>)}</div>)}</div>;
+  if (slug === "badges") return <div className="grid gap-3">{(["solid", "soft", "outline"] as const).map((variant) => <div key={variant} className="flex flex-wrap gap-4"><span className="w-20 text-sm text-subtle">{variant}</span>{(["primary", "secondary", "neutral", "success", "warning", "error"] as const).map((tone) => <Badge key={tone} tone={tone} variant={variant}>{tone}</Badge>)}</div>)}</div>;
   return <ComponentPreview slug={slug} />;
 }
 
