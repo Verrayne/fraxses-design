@@ -6,6 +6,36 @@ import HelpCircle from "lucide-react/dist/esm/icons/help-circle.js";
 import Menu from "lucide-react/dist/esm/icons/menu.js";
 import Plus from "lucide-react/dist/esm/icons/plus.js";
 import {
+  Area,
+  AreaChart as RechartsAreaChart,
+  Bar,
+  BarChart as RechartsBarChart,
+  CartesianGrid,
+  Cell,
+  Funnel,
+  FunnelChart,
+  LabelList,
+  Line,
+  LineChart as RechartsLineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Sankey,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ZAxis,
+} from "recharts";
+import {
   Alert,
   Avatar,
   Badge,
@@ -624,7 +654,180 @@ function componentTokenItems(slug: string) {
   return ["--foreground", "--foreground-subtle", "--border", "--focus-ring"];
 }
 
+type ChartType = "bar" | "multi-bar" | "stacked-bar" | "line" | "sparkline" | "area" | "pie" | "donut" | "scatter" | "gauge" | "radar" | "heatmap" | "funnel" | "sankey" | "map";
+
+const chartSeries = [
+  { name: "Jan", mobile: 420, desktop: 280, api: 180, active: 600, previous: 410 },
+  { name: "Feb", mobile: 520, desktop: 330, api: 210, active: 620, previous: 405 },
+  { name: "Mar", mobile: 390, desktop: 285, api: 160, active: 625, previous: 400 },
+  { name: "Apr", mobile: 610, desktop: 360, api: 285, active: 650, previous: 410 },
+  { name: "May", mobile: 370, desktop: 260, api: 125, active: 590, previous: 320 },
+  { name: "Jun", mobile: 640, desktop: 390, api: 250, active: 645, previous: 430 },
+  { name: "Jul", mobile: 470, desktop: 320, api: 140, active: 620, previous: 395 },
+  { name: "Aug", mobile: 680, desktop: 420, api: 300, active: 750, previous: 540 },
+  { name: "Sep", mobile: 720, desktop: 450, api: 330, active: 780, previous: 505 },
+  { name: "Oct", mobile: 560, desktop: 380, api: 240, active: 750, previous: 460 },
+  { name: "Nov", mobile: 630, desktop: 410, api: 280, active: 780, previous: 480 },
+  { name: "Dec", mobile: 710, desktop: 470, api: 350, active: 820, previous: 500 },
+];
+
+const chartSegments = [
+  { name: "Mobile", value: 145 },
+  { name: "Desktop", value: 92 },
+  { name: "API", value: 58 },
+];
+
+const scatterData = chartSeries.map((item, index) => ({ x: item.mobile, y: item.desktop, z: index + 3, name: item.name }));
+const radarData = ["Reliability", "Latency", "Coverage", "Freshness", "Cost", "Quality"].map((name, index) => ({ name, current: [86, 74, 92, 68, 78, 88][index], target: 80 }));
+const funnelData = [
+  { name: "Sources", value: 520, fill: "var(--chart-1)" },
+  { name: "Validated", value: 410, fill: "var(--chart-2)" },
+  { name: "Published", value: 260, fill: "var(--chart-3)" },
+  { name: "Used", value: 160, fill: "var(--chart-4)" },
+];
+const heatmapRows = ["Sources", "Objects", "Queries", "Jobs"];
+const heatmapColumns = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const mapRegions = [
+  { name: "North", x: "15%", y: "20%", w: "30%", h: "28%", value: "42" },
+  { name: "East", x: "48%", y: "24%", w: "34%", h: "24%", value: "31" },
+  { name: "South", x: "32%", y: "55%", w: "40%", h: "28%", value: "27" },
+];
+
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name?: string; value?: number | string; color?: string; payload?: { name?: string } }>; label?: string }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border border-border bg-elevated px-4 py-3 text-sm shadow-raised">
+      <p className="mb-2 font-medium">{label ?? payload[0]?.payload?.name ?? "Value"}</p>
+      <div className="grid gap-1.5">
+        {payload.map((item) => (
+          <div className="flex items-center gap-2" key={`${item.name}-${item.value}`}>
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: item.color ?? "var(--chart-1)" }} />
+            <span>{item.name}</span>
+            <span className="ml-4 font-medium">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChartFrame({ type }: { type: ChartType }) {
+  const grid = <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" vertical={type !== "area"} />;
+  const axis = { tick: { fill: "var(--foreground-subtle)", fontSize: 12 }, axisLine: { stroke: "var(--border)" }, tickLine: false };
+  const colours = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
+
+  if (type === "sparkline") {
+    return <div className="h-32"><ResponsiveContainer><RechartsLineChart data={chartSeries}><Tooltip content={<ChartTooltip />} /><Line dataKey="active" type="monotone" stroke="var(--chart-1)" strokeWidth={2.5} dot={false} /></RechartsLineChart></ResponsiveContainer></div>;
+  }
+
+  if (type === "pie" || type === "donut") {
+    return (
+      <div className="h-80">
+        <ResponsiveContainer>
+          <PieChart>
+            <Tooltip content={<ChartTooltip />} />
+            <Pie data={chartSegments} dataKey="value" nameKey="name" innerRadius={type === "donut" ? 82 : 0} outerRadius={116} paddingAngle={type === "donut" ? 3 : 1}>
+              {chartSegments.map((entry, index) => <Cell fill={colours[index]} key={entry.name} />)}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (type === "gauge") {
+    return (
+      <div className="h-72">
+        <ResponsiveContainer>
+          <RadialBarChart cx="50%" cy="70%" innerRadius="72%" outerRadius="100%" barSize={18} data={[{ name: "Health", value: 76, fill: "var(--chart-1)" }]} startAngle={180} endAngle={0}>
+            <RadialBar dataKey="value" cornerRadius={999} background={{ fill: "var(--surface-active)" }} />
+            <text x="50%" y="64%" textAnchor="middle" fill="var(--foreground)" className="text-3xl font-semibold">76%</text>
+            <text x="50%" y="76%" textAnchor="middle" fill="var(--foreground-subtle)" className="text-sm">source health</text>
+          </RadialBarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (type === "radar") {
+    return <div className="h-80"><ResponsiveContainer><RadarChart data={radarData}><PolarGrid stroke="var(--border)" /><PolarAngleAxis dataKey="name" tick={{ fill: "var(--foreground-subtle)", fontSize: 12 }} /><PolarRadiusAxis tick={false} axisLine={false} /><Radar dataKey="target" stroke="var(--chart-4)" fill="var(--chart-4)" fillOpacity={0.16} /><Radar dataKey="current" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.28} /><Tooltip content={<ChartTooltip />} /></RadarChart></ResponsiveContainer></div>;
+  }
+
+  if (type === "heatmap") {
+    return <div className="grid gap-2">{heatmapRows.map((row, rowIndex) => <div className="grid grid-cols-[88px_repeat(7,minmax(0,1fr))] gap-2" key={row}><span className="text-sm text-subtle">{row}</span>{heatmapColumns.map((column, columnIndex) => <span className="h-10 rounded-md border border-border" key={column} title={`${row} ${column}`} style={{ background: `color-mix(in srgb, var(--chart-${((rowIndex + columnIndex) % 5) + 1}) ${28 + rowIndex * 12 + columnIndex * 4}%, var(--surface-raised))` }} />)}</div>)}</div>;
+  }
+
+  if (type === "funnel") {
+    return <div className="h-80"><ResponsiveContainer><FunnelChart><Tooltip content={<ChartTooltip />} /><Funnel dataKey="value" data={funnelData} isAnimationActive><LabelList position="right" fill="var(--foreground)" stroke="none" dataKey="name" /></Funnel></FunnelChart></ResponsiveContainer></div>;
+  }
+
+  if (type === "sankey") {
+    const data = { nodes: [{ name: "Sources" }, { name: "Objects" }, { name: "Queries" }, { name: "Dashboards" }, { name: "Jobs" }], links: [{ source: 0, target: 1, value: 180 }, { source: 1, target: 2, value: 110 }, { source: 1, target: 3, value: 70 }, { source: 0, target: 4, value: 40 }] };
+    return <div className="h-80"><ResponsiveContainer><Sankey data={data} nodePadding={22} nodeWidth={14} link={{ stroke: "var(--chart-2)", strokeOpacity: 0.28 }} node={{ fill: "var(--chart-1)", stroke: "var(--surface-raised)" }}><Tooltip content={<ChartTooltip />} /></Sankey></ResponsiveContainer></div>;
+  }
+
+  if (type === "map") {
+    return <div className="relative h-80 overflow-hidden rounded-xl border border-border bg-surface p-6">{mapRegions.map((region, index) => <div key={region.name} className="absolute rounded-2xl border border-border p-4 shadow-soft transition hover:-translate-y-0.5" style={{ left: region.x, top: region.y, width: region.w, height: region.h, background: `color-mix(in srgb, var(--chart-${index + 1}) 34%, var(--surface-raised))` }}><p className="font-medium">{region.name}</p><p className="text-2xl font-semibold">{region.value}</p></div>)}</div>;
+  }
+
+  return (
+    <div className="h-80">
+      <ResponsiveContainer>
+        {type === "line" ? (
+          <RechartsLineChart data={chartSeries}>{grid}<XAxis dataKey="name" {...axis} /><YAxis {...axis} /><Tooltip content={<ChartTooltip />} /><Line dataKey="active" type="monotone" stroke="var(--chart-1)" strokeWidth={2} dot={false} /><Line dataKey="previous" type="monotone" stroke="var(--chart-2)" strokeWidth={2} dot={false} /><Line dataKey="desktop" type="monotone" stroke="var(--chart-3)" strokeWidth={2} dot={false} /></RechartsLineChart>
+        ) : type === "area" ? (
+          <RechartsAreaChart data={chartSeries}>{grid}<defs><linearGradient id="chartAreaFill" x1="0" x2="0" y1="0" y2="1"><stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.22} /><stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0.02} /></linearGradient></defs><XAxis dataKey="name" {...axis} /><YAxis {...axis} /><Tooltip content={<ChartTooltip />} /><Area dataKey="active" type="monotone" stroke="var(--chart-1)" strokeWidth={2} fill="url(#chartAreaFill)" /><Area dataKey="previous" type="monotone" stroke="var(--chart-2)" strokeWidth={2} fill="transparent" /></RechartsAreaChart>
+        ) : type === "scatter" ? (
+          <ScatterChart>{grid}<XAxis dataKey="x" name="Mobile" {...axis} /><YAxis dataKey="y" name="Desktop" {...axis} /><ZAxis dataKey="z" range={[80, 280]} /><Tooltip content={<ChartTooltip />} /><Scatter data={scatterData} fill="var(--chart-1)" /></ScatterChart>
+        ) : (
+          <RechartsBarChart data={chartSeries}>{grid}<XAxis dataKey="name" {...axis} /><YAxis {...axis} /><Tooltip content={<ChartTooltip />} />{type === "bar" && <Bar dataKey="mobile" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />}{type === "multi-bar" && <><Bar dataKey="mobile" fill="var(--chart-1)" radius={[4, 4, 0, 0]} /><Bar dataKey="desktop" fill="var(--chart-2)" radius={[4, 4, 0, 0]} /><Bar dataKey="api" fill="var(--chart-3)" radius={[4, 4, 0, 0]} /></>}{type === "stacked-bar" && <><Bar dataKey="mobile" stackId="a" fill="var(--chart-1)" /><Bar dataKey="desktop" stackId="a" fill="var(--chart-2)" /><Bar dataKey="api" stackId="a" fill="var(--chart-3)" radius={[4, 4, 0, 0]} /></>}</RechartsBarChart>
+        )}
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function ChartExample({ type }: { type: ChartType }) {
+  return <div className="rounded-2xl border border-border bg-elevated p-6 shadow-soft"><ChartFrame type={type} /></div>;
+}
+
+function chartExampleCode(type: ChartType) {
+  const chartName = labelFromSlug(type);
+  return `import { ResponsiveContainer } from "recharts";
+
+export function ${chartName.replace(/\s+/g, "")}Example() {
+  return (
+    <div className="rounded-2xl border border-border bg-elevated p-6 shadow-soft">
+      <ResponsiveContainer width="100%" height={320}>
+        {/* Render the ${chartName.toLowerCase()} using Fraxses chart tokens:
+            --chart-1, --chart-2, --chart-3, --border and --surface-raised. */}
+      </ResponsiveContainer>
+    </div>
+  );
+}`;
+}
+
 function componentVariants(slug: string): ComponentVariantExample[] {
+  if (slug === "charts") {
+    return ([
+      ["bar", "Bar Chart"],
+      ["multi-bar", "Multi Bar Chart"],
+      ["stacked-bar", "Stacked Bar Chart"],
+      ["line", "Line Chart"],
+      ["sparkline", "Sparkline"],
+      ["area", "Area Chart"],
+      ["pie", "Pie"],
+      ["donut", "Donut"],
+      ["scatter", "Scatter"],
+      ["gauge", "Gauge"],
+      ["radar", "Radar"],
+      ["heatmap", "Heatmap"],
+      ["funnel", "Funnel"],
+      ["sankey", "Sankey"],
+      ["map", "Map"],
+    ] as Array<[ChartType, string]>).map(([type, label]) => ({ id: type, label, code: chartExampleCode(type), preview: <ChartExample type={type} /> }));
+  }
+
   const variants: Record<string, ComponentVariantExample[]> = {
     badges: [
       { id: "solid-badges", label: "Solid Badges", code: `<Badge tone="primary">Primary</Badge>
@@ -916,7 +1119,7 @@ function ComponentPreview({ slug }: { slug: string }) {
   if (slug === "progress") return <div className="grid gap-4"><Progress /><Progress soft /><Progress tone="secondary" /><Progress tone="secondary" soft /></div>;
   if (slug === "links") return <p className="max-w-xl leading-7 text-subtle">Inline links use <a className="text-primary underline-offset-4 hover:underline" href="/docs/components/links">theme-aware colour</a> and stay readable inside continuous text.</p>;
   if (slug === "cards") return <div className="grid gap-4 md:grid-cols-3"><Card title="Expenses"><p className="mt-2 text-2xl font-semibold">$12,543</p></Card><Card title="Orders"><BarChart /></Card><Card title="Expenses"><DonutChart /></Card></div>;
-  if (slug === "charts") return <div className="grid gap-4 md:grid-cols-2"><Card title="Multi Bar Chart"><BarChart /></Card><Card title="Line Chart"><LineChart /></Card><Card title="Donut Chart"><DonutChart /></Card><Card title="Stacked Bar Chart"><BarChart stacked /></Card></div>;
+  if (slug === "charts") return null;
   if (slug === "tables") return <DataTable />;
   if (slug === "navigation") return <DashboardPreview compact />;
   return <div className="grid gap-3 md:grid-cols-2"><Card title={labelFromSlug(slug)}><p className="mt-2 text-sm text-subtle">Shared documentation shell with live theme tokens. Needs deeper source examples where the reference did not define exact behaviour.</p></Card><Alert tone="neutral" variant="soft" title="Needs source verification" body="Component-specific motion and edge-case states are pending." /></div>;
@@ -1048,7 +1251,7 @@ function ComponentPropertiesTable({ slug }: { slug: string }) {
     links: [["href", "string", "required", "Required", "Destination URL or route."], ["children", "ReactNode", "required", "Required", "Visible link text."], ["target", "string", "undefined", "Optional", "Use only when opening external destinations."]],
     cards: [["title", "string", '"Orders"', "Optional", "Card heading."], ["children", "ReactNode", "metric fallback", "Optional", "Card body content."], ["elevation", "token", "--shadow-soft", "Optional", "Needs source verification before exposing as a prop."]],
     "empty-states": [["title", "string", "required", "Required", "Explains the empty condition."], ["description", "string", "required", "Required", "Guides the next step."], ["action", "ReactNode", "undefined", "Optional", "Primary recovery action."]],
-    charts: [["type", "bar | line | donut | stacked", "required", "Required", "Selects chart geometry."], ["data", "array", "demo data", "Required", "Values rendered by the chart."], ["tokens", "--chart-*", "theme tokens", "Optional", "Maps series colour to semantic chart tokens."]],
+    charts: [["type", "ChartType", "required", "Required", "Supports bar, multi-bar, stacked-bar, line, sparkline, area, pie, donut, scatter, gauge, radar, heatmap, funnel, sankey, and map."], ["data", "array", "demo data", "Required", "Values rendered by the chart."], ["tokens", "--chart-*", "theme tokens", "Optional", "Maps series colour to semantic chart tokens."]],
     tables: [["columns", "array", "required", "Required", "Column definitions."], ["rows", "array", "required", "Required", "Records shown in the table."], ["searchable", "boolean", "true in preview", "Optional", "Adds filtering when supported. Needs source verification."]],
     navigation: [["items", "array", "required", "Required", "Navigation destinations."], ["activeItem", "string", "current route", "Optional", "Highlights the active destination."], ["collapsible", "boolean", "true in sidebar", "Optional", "Supports expandable groups."]],
     modals: [["open", "boolean", "required", "Required", "Controls dialog visibility."], ["title", "string", "required", "Required", "Dialog accessible heading."], ["onClose", "function", "required", "Required", "Dismiss handler."], ["actions", "ReactNode", "undefined", "Optional", "Footer actions."]],
