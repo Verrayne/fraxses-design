@@ -1,4 +1,5 @@
-import { Search, SunMoon } from "lucide-react";
+import Search from "lucide-react/dist/esm/icons/search.js";
+import SunMoon from "lucide-react/dist/esm/icons/sun-moon.js";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 
 export function Header() {

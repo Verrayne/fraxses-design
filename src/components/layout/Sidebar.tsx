@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down.js";
 import { useState } from "react";
 import { docsNav } from "../../docs/sharedRegistry";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";

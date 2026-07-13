@@ -1,16 +1,14 @@
-import {
-  AlertCircle,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  Circle,
-  Info,
-  Megaphone,
-  Search,
-  User,
-  X,
-} from "lucide-react";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle.js";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right.js";
+import Check from "lucide-react/dist/esm/icons/check.js";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2.js";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down.js";
+import Circle from "lucide-react/dist/esm/icons/circle.js";
+import Info from "lucide-react/dist/esm/icons/info.js";
+import Megaphone from "lucide-react/dist/esm/icons/megaphone.js";
+import Search from "lucide-react/dist/esm/icons/search.js";
+import User from "lucide-react/dist/esm/icons/user.js";
+import X from "lucide-react/dist/esm/icons/x.js";
 import type { ButtonHTMLAttributes, CSSProperties, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 export type Tone = "primary" | "secondary" | "neutral" | "success" | "warning" | "error";

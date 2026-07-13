@@ -1,4 +1,5 @@
-import { Check, X } from "lucide-react";
+import Check from "lucide-react/dist/esm/icons/check.js";
+import X from "lucide-react/dist/esm/icons/x.js";
 
 export function DoDont({ doItems, dontItems }: { doItems: string[]; dontItems: string[] }) {
   return (

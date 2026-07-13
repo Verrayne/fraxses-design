@@ -1,4 +1,8 @@
-import { Box, Component, Layers, Palette, Shapes } from "lucide-react";
+import Box from "lucide-react/dist/esm/icons/box.js";
+import Component from "lucide-react/dist/esm/icons/component.js";
+import Layers from "lucide-react/dist/esm/icons/layers.js";
+import Palette from "lucide-react/dist/esm/icons/palette.js";
+import Shapes from "lucide-react/dist/esm/icons/shapes.js";
 
 export const foundationItems = [
   "colours",

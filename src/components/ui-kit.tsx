@@ -1,4 +1,6 @@
-import { CheckCircle2, ChevronDown, X } from "lucide-react";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2.js";
+import ChevronDown from "lucide-react/dist/esm/icons/chevron-down.js";
+import X from "lucide-react/dist/esm/icons/x.js";
 import { ButtonHTMLAttributes, InputHTMLAttributes, PropsWithChildren, ReactNode } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

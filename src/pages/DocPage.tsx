@@ -1,6 +1,10 @@
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowRight, Copy, HelpCircle, Menu, Plus } from "lucide-react";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right.js";
+import Copy from "lucide-react/dist/esm/icons/copy.js";
+import HelpCircle from "lucide-react/dist/esm/icons/help-circle.js";
+import Menu from "lucide-react/dist/esm/icons/menu.js";
+import Plus from "lucide-react/dist/esm/icons/plus.js";
 import {
   Alert,
   Avatar,
