@@ -1,13 +1,6 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
-import { getTheme, themes, validateThemeTokens, type ThemeDefinition } from "../../themes/themeRegistry";
-
-type ThemeContextValue = {
-  themeId: ThemeDefinition["id"];
-  activeTheme: ThemeDefinition;
-  setThemeId: (id: ThemeDefinition["id"]) => void;
-};
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+import { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { getTheme, validateThemeTokens, type ThemeDefinition } from "../../themes/themeRegistry";
+import { ThemeContext } from "./themeContext";
 const storageKey = "fraxses-theme";
 
 validateThemeTokens();
@@ -61,11 +54,3 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
-
-export function useTheme() {
-  const value = useContext(ThemeContext);
-  if (!value) throw new Error("useTheme must be used within ThemeProvider");
-  return value;
-}
-
-export { themes };

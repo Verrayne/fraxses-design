@@ -1,5 +1,5 @@
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right.js";
 import Copy from "lucide-react/dist/esm/icons/copy.js";
 import HelpCircle from "lucide-react/dist/esm/icons/help-circle.js";
@@ -59,8 +59,8 @@ import {
 } from "../components/ui/shared";
 import { DoDont } from "../components/docs/DoDont";
 import { componentItems, foundationItems, labelFromSlug, patternItems, redirectLegacyPath } from "../docs/sharedRegistry";
-import { getTheme, semanticTokenNames, themes, type PaletteFamily, type ThemeDefinition } from "../themes/themeRegistry";
-import { useTheme } from "../components/theme/ThemeProvider";
+import { getTheme, semanticTokenNames, type PaletteFamily, type ThemeDefinition } from "../themes/themeRegistry";
+import { useTheme } from "../components/theme/themeContext";
 
 export function DocPage() {
   const params = useParams();
@@ -1619,14 +1619,14 @@ function componentVariants(slug: string): ComponentVariantExample[] {
 }
 
 function SharedComponentPage({ slug }: { slug: string }) {
-  const variantExamples = componentVariants(slug);
-  const navItems = slug === "buttons" ? buttonPageNavItems : [
-    { id: "overview", label: "Overview" },
-    { id: "usage", label: "Usage" },
-    ...variantExamples.map(({ id, label }) => ({ id, label })),
-    { id: "properties", label: "Properties" },
-    { id: "tokens", label: "Token references" },
-  ];
+  const variantExamples = useMemo(() => componentVariants(slug), [slug]);
+  const navItems = useMemo(() => slug === "buttons" ? buttonPageNavItems : [
+      { id: "overview", label: "Overview" },
+      { id: "usage", label: "Usage" },
+      ...variantExamples.map(({ id, label }) => ({ id, label })),
+      { id: "properties", label: "Properties" },
+      { id: "tokens", label: "Token references" },
+    ], [slug, variantExamples]);
   const [activeSection, setActiveSection] = useState(navItems[0].id);
 
   useEffect(() => {
@@ -1916,10 +1916,6 @@ function ComponentPropertiesTable({ slug }: { slug: string }) {
       </table>
     </div>
   );
-}
-
-function PropsTable() {
-  return <div className="overflow-hidden rounded-lg border border-border"><table className="w-full text-left text-sm"><tbody className="divide-y divide-border">{["tone", "variant", "size", "disabled", "loading", "prefixIcon", "suffixIcon", "children"].map((prop) => <tr key={prop}><th className="w-40 bg-surface px-4 py-3 font-mono">{prop}</th><td className="px-4 py-3 text-subtle">Shared prop used by the component family where applicable.</td></tr>)}</tbody></table></div>;
 }
 
 function PatternPage({ slug }: { slug: string }) {

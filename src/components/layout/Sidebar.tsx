@@ -3,7 +3,7 @@ import ChevronDown from "lucide-react/dist/esm/icons/chevron-down.js";
 import { useState } from "react";
 import { docsNav } from "../../docs/sharedRegistry";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
-import { useTheme } from "../theme/ThemeProvider";
+import { useTheme } from "../theme/themeContext";
 
 export function Sidebar() {
   const { activeTheme } = useTheme();

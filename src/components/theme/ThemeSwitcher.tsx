@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Check from "lucide-react/dist/esm/icons/check.js";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down.js";
-import { themes, useTheme } from "./ThemeProvider";
-import type { ThemeDefinition } from "../../themes/themeRegistry";
+import { themes, type ThemeDefinition } from "../../themes/themeRegistry";
+import { useTheme } from "./themeContext";
 
 type ThemeSwitcherProps = {
   size?: "sm" | "lg";

@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import type { CSSProperties } from "react";
 import { Button, Badge, Card } from "../components/ui/shared";
-import { themes } from "../components/theme/ThemeProvider";
-import { useTheme } from "../components/theme/ThemeProvider";
-import type { ThemeDefinition } from "../themes/themeRegistry";
+import { useTheme } from "../components/theme/themeContext";
+import { themes, type ThemeDefinition } from "../themes/themeRegistry";
 
 export function HomePage() {
   const navigate = useNavigate();

@@ -54,7 +54,7 @@ export const patternItems = [
 export const docsNav = [
   { title: "Overview", icon: Box, items: [{ title: "Overview", href: "/docs/overview" }] },
   { title: "Foundations", icon: Palette, items: foundationItems.map((slug) => ({ title: labelFromSlug(slug), href: `/docs/foundations/${slug}` })) },
-  { title: "Components", icon: Component, items: [{ title: "Overview", href: "/docs/components/overview" }, ...componentItems.map((slug) => ({ title: labelFromSlug(slug), href: `/docs/components/${slug}` }))] },
+  { title: "Components", icon: Component, items: [{ title: "Overview", href: "/docs/components/overview" }, ...componentItems.flatMap((slug) => slug === "charts" ? [{ title: labelFromSlug(slug), href: `/docs/components/${slug}` }, { title: "Dashboard Example", href: "/dashboard-example" }] : [{ title: labelFromSlug(slug), href: `/docs/components/${slug}` }])] },
   { title: "Patterns", icon: Layers, items: patternItems.map((slug) => ({ title: labelFromSlug(slug), href: `/docs/patterns/${slug}` })) },
 ];
 
